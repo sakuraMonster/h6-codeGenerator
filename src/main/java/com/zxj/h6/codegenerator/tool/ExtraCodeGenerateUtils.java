@@ -14,9 +14,7 @@ import java.util.Objects;
 /**
  * 额外的代码生成工具
  *
- * @author makejava
- * @version 1.0.0
- * @since 2018/11/01 10:11
+ * @author zhangxuejun
  */
 public class ExtraCodeGenerateUtils {
     /**
