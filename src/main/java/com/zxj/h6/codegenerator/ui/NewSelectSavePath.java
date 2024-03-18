@@ -232,12 +232,12 @@ public class NewSelectSavePath extends DialogWrapper {
 
   private void refreshData() {
     // 获取选中的表信息（鼠标右键的那张表），并提示未知类型
-    TableInfo tableInfo;
-    if(entityMode) {
-      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectPsiClass());
-    } else {
-      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
-    }
+    TableInfo tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
+//    if(entityMode) {
+//      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectPsiClass());
+//    } else {
+//      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
+//    }
 
     // 设置默认配置信息
     if (!StringUtils.isEmpty(tableInfo.getSaveModelName())) {
