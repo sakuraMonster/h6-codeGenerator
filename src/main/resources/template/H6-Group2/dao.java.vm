@@ -1,0 +1,95 @@
+##定义初始变量
+#set($fileName = $tool.append($tableInfo.name, "Dao"))
+#set($clazz = $!tool.firstLowerCase($!{tableInfo.name}))
+##设置回调
+$!callback.setFileName($tool.append($fileName, ".java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/dao"))
+
+##拿到主键
+#if(!$tableInfo.pkColumn.isEmpty())
+  #set($pk = $tableInfo.pkColumn.get(0))
+#end
+
+/**
+ * 版权所有(C)，上海海鼎信息工程股份有限公司，${year.vm}，所有权利保留。
+ *
+ * 项目名：$!{module}
+ * 文件名：$!{fileName}.java
+ * 模块说明：
+ * 修改历史：
+ * ${year.vm}年${month.vm}月${day.vm}日 - ${author} - 创建。
+ */
+
+#if($tableInfo.savePackageName)package $!{tableInfo.savePackageName}.#{end}dao;
+
+import $!{tableInfo.savePackageName}.$!{tableInfo.name};
+import com.hd123.latin.biz.entity.LOperateContext;
+import com.hd123.latin.biz.query.HQueryResult;
+import com.hd123.latin.exception.LatinServiceException;
+import com.hd123.rumba.commons.biz.query.QueryDefinition;
+import java.util.List;
+
+
+/**
+ * $!{tableInfo.comment}($!{tableInfo.name})数据库访问层
+ *
+ * @author $!author
+ */
+public interface $!{fileName} {
+
+  /** 用于在Spring容器的默认ID。 */
+  // todo xml中注册bean的id
+  public static final String DEFAULT_CONTEXT_ID = "todo: 注册dao的beanId";
+
+
+  /**
+   *
+   * @param billNumber
+   *          单号。
+   * @param fetchParts
+   * @return $!{tableInfo.comment}。
+   */
+    $!{tableInfo.name} getByNumber(String billNumber, String... fetchParts);
+
+  /**
+   *
+   * @param $!{clazz}
+   *          $!{tableInfo.comment}, not null。
+   * @param targetState
+   *          目标状态。
+   * @param operCtx
+   *          操作信息，not null。
+   * @return 单号。
+   */
+  String save($!{tableInfo.name} $!{clazz}, int targetState, LOperateContext operCtx) throws LatinServiceException;
+
+  /**
+   *
+   * @param billNumber
+   *          单号，not null。
+   * @param state
+   *          目标状态，not null。
+   * @param operCtx
+   *          操作信息，not null。
+   */
+  void changeBizState(String billNumber, int state, LOperateContext operCtx)
+          throws LatinServiceException;
+
+  /**
+   *
+   * @param $!{clazz}
+   *          $!{tableInfo.comment}, not null。
+   * @param operCtx
+   *          操作信息，not null。
+   */
+  void remove($!{tableInfo.name} $!{clazz}, LOperateContext operCtx);
+
+  /**
+   *
+   * @param definition
+   *          查询定义，not null。
+   * @return 查询结果。
+   */
+  HQueryResult<$!{tableInfo.name}> query(QueryDefinition definition, String... fetchParts);
+
+}

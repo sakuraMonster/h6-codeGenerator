@@ -1,0 +1,204 @@
+##定义初始变量
+#set($fileName = $tool.append($tableInfo.name, "DaoImpl"))
+#set($clazz = $!tool.firstLowerCase($!{tableInfo.name}))
+
+##设置回调
+$!callback.setFileName($tool.append($fileName, ".java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/dao/impl"))
+
+##拿到主键
+#if(!$tableInfo.pkColumn.isEmpty())
+  #set($pk = $tableInfo.pkColumn.get(0))
+#end
+
+/**
+ * 版权所有(C)，上海海鼎信息工程股份有限公司，${year.vm}，所有权利保留。
+ *
+ * 项目名：$!{module}
+ * 文件名：$!{fileName}.java
+ * 模块说明：
+ * 修改历史：
+ * ${year.vm}年${month.vm}月${day.vm}日 - ${author} - 创建。
+ */
+
+#if($tableInfo.savePackageName)package $!{tableInfo.savePackageName}.#{end}dao.impl;
+
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import $!{tableInfo.savePackageName}.$!{tableInfo.name};
+import $!{tableInfo.savePackageName}.P$!{tableInfo.name};
+import $!{tableInfo.savePackageName}.$!{tableInfo.name}s;
+import $!{tableInfo.savePackageName}.dao.$!{tableInfo.name}Dao;
+import com.hd123.hdpos4.biz.BillState;
+import com.hd123.latin.biz.LatinConstants;
+import com.hd123.latin.biz.entity.CustomField;
+import com.hd123.latin.biz.entity.LOperateContext;
+import com.hd123.latin.biz.query.HQueryResult;
+import com.hd123.latin.dao.BasicDaoImpl;
+import com.hd123.latin.dao.International;
+import com.hd123.latin.dao.LatinTX;
+import com.hd123.latin.dao.ProcedureCaller;
+import com.hd123.latin.dao.ProcedureResult;
+import com.hd123.latin.exception.LatinServiceException;
+import com.hd123.latin.message.ServerMessages;
+import com.hd123.latin.query.NativeBigInQueryExecutor;
+import com.hd123.latin.query.QueryDefinitionDecoder;
+import com.hd123.latin.sys.service.config.customfield.CustomFieldService;
+import com.hd123.latin.util.ApplicationContextUtils;
+import com.hd123.latin.util.LatinUtil;
+import com.hd123.rumba.commons.biz.query.QueryDefinition;
+import com.hd123.rumba.commons.biz.query.QueryResult;
+import com.hd123.rumba.commons.lang.Assert;
+import com.hd123.rumba.commons.jpa.query.sql.SQLSubquery;
+import com.hd123.rumba.commons.lang.StringUtil;
+
+import java.sql.Types;
+import java.util.List;
+
+
+/**
+ * $!{tableInfo.comment}($!{tableInfo.name})服务实现类
+ *
+ * @author $!author
+ */
+@Repository($!{tableInfo.name}Dao.DEFAULT_CONTEXT_ID)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Transactional(rollbackFor = Exception.class, propagation = Propagation.SUPPORTS)
+public class $!{fileName} extends BasicDaoImpl implements $!{tableInfo.name}Dao {
+
+  @Override
+  @LatinTX
+  public String save($!{tableInfo.name} $!{clazz}, int targetState, LOperateContext operCtx)
+        throws LatinServiceException {
+
+    // todo  converter转换
+    P$!{tableInfo.name} entity = null;
+    // todo 保存单据
+    // todo 更新未审核日志
+    // todo 保存自定义字段
+    // todo 状态变更
+    if ($!{clazz}.getLstupdTime() == null && !StringUtil.isNullOrBlank($!{clazz}.getModNum())) {
+      // 修正
+      bizToRevised($!{clazz}.getNum(), targetState, operCtx);
+    } else if (targetState > 0 && $!{clazz}.getStat() != targetState) {
+      changeBizState($!{clazz}.getNum(), targetState, operCtx);
+    }
+    return entity.getNum();
+  }
+
+  @Override
+  @LatinTX
+  public void changeBizState(String billNumber, int targetState, LOperateContext operCtx)
+      throws LatinServiceException {
+    if (targetState % 100 == 10) {
+      // 作废
+      bizToAborted(billNumber, targetState, operCtx);
+    } else {
+      // 状态流
+      bizToAudtied(billNumber, targetState, operCtx);
+    }
+  }
+
+  @Override
+  @LatinTX
+  public void remove($!{tableInfo.name} $!{clazz}, LOperateContext operCtx) {
+    // todo 刪除单据和日志
+  }
+
+  @Override
+  @International(moduleId = $!{tableInfo.name}s.MODULEID)
+  public $!{tableInfo.name} getByNumber(String billNumber, String... fetchParts) {
+    QueryDefinition def = new QueryDefinition();
+    // todo 使用单号和单据类型作为筛选条件
+    def.addCondition($!{tableInfo.name}s.CONDITION_BILLNUMBER_EQUALS, billNumber);
+    def.addCondition($!{tableInfo.name}s.CONDITION_CLS_EQUALS, $!{tableInfo.name}s.BILLTYPE);
+    List<$!{tableInfo.name}> $!{clazz}s = query(def, fetchParts).getRecords();
+    if ($!{clazz}s.isEmpty())
+      return null;
+    return $!{clazz}s.get(0);
+  }
+
+  @Override
+  @International(moduleId = $!{tableInfo.name}s.MODULEID)
+  public HQueryResult<$!{tableInfo.name}> query(QueryDefinition definition, String... fetchParts) {
+    List<CustomField> fields = getCustomFields();
+    QueryDefinitionDecoder queryDecoder = new QueryDefinitionDecoder("$!{clazz}", "o");
+    // todo 增加数据解析器 $!{tableInfo.name}QueryDecoder
+    // todo 增加查询数据   sq.addSelect
+    SQLSubquery sq = queryDecoder.decodeNative(definition);
+    // todo 查询单头
+    NativeBigInQueryExecutor queryExecutor = new NativeBigInQueryExecutor(em, sq, fields);
+    QueryResult<$!{tableInfo.name}> qr = queryExecutor.query(definition.getPage(), definition.getPageSize(),
+      $!{tableInfo.name}.class);
+    HQueryResult<$!{tableInfo.name}> result = new HQueryResult<$!{tableInfo.name}>();
+    result.setMore(qr.isMore());
+    result.setPaging(qr.getPaging());
+    result.setRecords(qr.getRecords());
+
+    // todo 查询其他明细
+
+    return result;
+  }
+
+  private void bizToAborted(String num, int targetState, LOperateContext operCtx)
+      throws LatinServiceException {
+    // todo 前置业务
+
+    // todo 替换存储过程
+    ProcedureResult pr = getProcedureCaller().call("todo: 作废存储过程", new Object[] {
+              $!{tableInfo.name}s.BILLTYPE, num, LatinUtil.toOperInfo(operCtx.getOperator()), targetState,
+            ProcedureCaller.OUT_VARCHAR }, Types.INTEGER);
+    LatinUtil.checkProcedureResult(pr,
+            LatinUtil.getServerMessages(LatinConstants.SYSTEM, false).get(ServerMessages.abort));
+
+    // todo 后置业务
+
+  }
+
+  private void bizToAudtied(String num, int targetState, LOperateContext operCtx)
+      throws LatinServiceException {
+    // todo 前置业务
+
+    // todo 替换存储过程
+    ProcedureResult pr = getProcedureCaller().call("todo: 审核存储过程", new Object[] {
+              $!{tableInfo.name}s.BILLTYPE, num, LatinUtil.toOperInfo(operCtx.getOperator()), targetState,
+            ProcedureCaller.OUT_VARCHAR }, Types.INTEGER);
+    LatinUtil.checkProcedureResult(pr,
+            LatinUtil.getServerMessages(LatinConstants.SYSTEM, false).get(ServerMessages.operate));
+
+    // todo 后置业务
+  }
+
+  private void bizToRevised(String num, int targetState, LOperateContext operCtx)
+      throws LatinServiceException {
+    // todo 前置业务
+
+    // todo 替换存储过程
+    ProcedureResult pr = getProcedureCaller().call("todo: 修正存储过程", new Object[] {
+              $!{tableInfo.name}s.BILLTYPE, num, LatinUtil.toOperInfo(operCtx.getOperator()), targetState,
+            ProcedureCaller.OUT_VARCHAR }, Types.INTEGER);
+    LatinUtil.checkProcedureResult(pr,
+            LatinUtil.getServerMessages(LatinConstants.SYSTEM, false).get(ServerMessages.operate));
+
+    // todo 后置业务
+  }
+
+  private List<CustomField> getCustomFields() {
+    return getCustomFieldService().getValids($!{tableInfo.name}s.MODULEID);
+  }
+
+  private CustomFieldService getCustomFieldService() {
+    return ApplicationContextUtils.getBean(CustomFieldService.DEFAULT_CONTEXT_ID,
+            CustomFieldService.class);
+  }
+
+  private ProcedureCaller getProcedureCaller() {
+    return ApplicationContextUtils.getBean(ProcedureCaller.DEFAULT_CONTEXT_ID,
+            ProcedureCaller.class);
+  }
+}

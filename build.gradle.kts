@@ -28,7 +28,11 @@ dependencies {
 
 // Set the JVM language level used to build the project.
 kotlin {
-    jvmToolchain(17)
+    @Suppress("UnstableApiUsage")
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.JETBRAINS
+    }
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
@@ -36,7 +40,6 @@ intellij {
     pluginName = properties("pluginName")
     version = properties("platformVersion")
     type = properties("platformType")
-
     // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
     plugins = properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
 }

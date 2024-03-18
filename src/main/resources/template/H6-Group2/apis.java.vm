@@ -1,0 +1,77 @@
+##引入宏定义
+$!{define.vm}
+
+##定义初始变量
+#set($fileName = $tool.append($tableInfo.name, "s"))
+##设置回调
+$!callback.setFileName($tool.append($fileName, ".java"))
+
+/**
+ * 版权所有(C)，上海海鼎信息工程股份有限公司，${year.vm}，所有权利保留。
+ *
+ * 项目名：$!{module}
+ * 文件名：$!{fileName}.java
+ * 模块说明：
+ * 修改历史：
+ * ${year.vm}年${month.vm}月${day.vm}日 - ${author} - 创建。
+ */
+
+##使用宏定义设置包后缀
+##setPackageSuffix("entity")
+
+#setPackage()
+
+##使用全局变量实现默认包导入
+$!{autoImport.vm}
+
+import com.hd123.latin.biz.query.DCriteria;
+import com.hd123.latin.sys.service.proplang.DefaultTranslateFields;
+import org.apache.commons.collections.ListUtils;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * 查询条件定义
+ *
+ * @author $!author
+ */
+public class $!{fileName} {
+
+/** =================== 模块 =================== */
+/** 模块定义 */
+// todo 定义模块id和模块号
+public static final String MODULEID = "模块id";
+// todo 替换真实的模块号
+public static final int MODULENO = -1000;
+/** 单据类型定义 */
+// todo 替换真实的单据类型
+public static final String BILLTYPE = "单据类型";
+/** 单据名称定义 */
+public static final String BILLBUS = "单据类型";
+/** 属性定义 */
+public static final String FETCH_DETAILS = "details";
+/** 属性定义 */
+public static final String FETCH_DETAILS_CUSTOMFIELDS = "details.customFields";
+
+
+/** =========================查询条件============================ **/
+/** 查询条件(String)：单据类型等于。 */
+public static final String CONDITION_CLS_EQUALS = "cls.equals";
+/** 查询条件(String)：单号等于。 */
+public static final String CONDITION_BILLNUMBER_EQUALS = "num.equals";
+
+public static DCriteria getDefaultCriteria() {
+  DCriteria criteria = new DCriteria();
+
+  // todo 默认模版设置
+
+  return criteria;
+}
+
+public static final List<String> NORMAL_TRANSLATE_FIELDS = ListUtils
+        .union(DefaultTranslateFields.nomal, Arrays.asList("munit#MeasureUnit"));
+
+public static final List<String> HIGH_TRANSLATE_FIELDS = ListUtils
+        .union(DefaultTranslateFields.nomal, Arrays.asList("munit#MeasureUnit"));
+}

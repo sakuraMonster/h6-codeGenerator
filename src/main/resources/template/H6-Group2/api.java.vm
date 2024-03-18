@@ -1,0 +1,46 @@
+##引入宏定义
+$!{define.vm}
+
+##使用宏定义设置回调（保存位置与文件后缀）
+#save("", ".java")
+
+/**
+ * 版权所有(C)，上海海鼎信息工程股份有限公司，${year.vm}，所有权利保留。
+ *
+ * 项目名：$!{module}
+ * 文件名：$!{tableInfo.name}.java
+ * 模块说明：
+ * 修改历史：
+ * ${year.vm}年${month.vm}月${day.vm}日 - ${author} - 创建。
+ */
+
+##使用宏定义设置包后缀
+##setPackageSuffix("entity")
+
+#setPackage()
+
+##使用全局变量实现默认包导入
+$!{autoImport.vm}
+import java.math.BigDecimal;
+import java.io.Serializable;
+
+##使用宏定义实现类注释信息
+#classComment("实体类")
+public class $!{tableInfo.name}#if(${extendsClassName}) extends $!{tool.getClsNameByFullName($extendsClassName)} #else implements Serializable #end {
+  private static final long serialVersionUID = $!tool.serial();
+    #foreach($column in $tableInfo.fullColumn)
+        #if(!$ignoreFields.contains($strTool.toLowerCase($!{column.name})))
+          private $!{tool.getClsNameByFullName($column.type)} $!{column.name};
+        #end
+    #end
+
+    #foreach($column in $tableInfo.fullColumn)
+        ##使用宏定义实现get,set方法
+        #if(!$ignoreFields.contains($strTool.toLowerCase($column.name)))
+            #if(${column.comment})
+              /** ${column.comment} */#end
+            #getSetMethod($column)
+        #end
+    #end
+
+}

@@ -1,0 +1,366 @@
+##定义初始变量
+#set($fileName = $tool.append($tableInfo.name, "Controller"))
+#set($clazz = $!tool.firstLowerCase($!{tableInfo.name}))
+#set($apiPackageName = $strTool.replaceAssignStr($!{tableInfo.savePackageName}, ".controllers"))
+##设置回调
+$!callback.setFileName($tool.append($fileName, ".java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, ""))
+
+##拿到主键
+#if(!$tableInfo.pkColumn.isEmpty())
+  #set($pk = $tableInfo.pkColumn.get(0))
+#end
+
+/**
+ * 版权所有(C)，上海海鼎信息工程股份有限公司，${year.vm}，所有权利保留。
+ *
+ * 项目名：$!{module}
+ * 文件名：$!{fileName}.java
+ * 模块说明：
+ * 修改历史：
+ * ${year.vm}年${month.vm}月${day.vm}日 - ${author} - 创建。
+ */
+
+#if($tableInfo.savePackageName)package $!{tableInfo.savePackageName}#{end};
+
+import java.text.ParseException;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import $!{apiPackageName}.$!{tableInfo.name};
+import $!{apiPackageName}.$!{tableInfo.name}s;
+import $!{apiPackageName}.P$!{tableInfo.name};
+import $!{apiPackageName}.service.$!{tableInfo.name}Service;
+import com.hd123.latin.exception.LatinServiceException;
+import com.hd123.latin.generator.NextBillNumberGenerator;
+import com.hd123.latin.web.controllers.common.QueryFilter;
+import com.hd123.latin.sys.service.config.module.BillNumNaviParameter;
+import com.hd123.latin.sys.service.config.module.ModuleQueryParameter;
+import com.hd123.latin.sys.service.config.module.ModuleService;
+import com.hd123.latin.sys.service.dquery.DQueryDefinition;
+import com.hd123.latin.sys.service.dquery.DQueryResult;
+import com.hd123.latin.sys.service.dquery.DQueryService;
+import com.hd123.latin.impex.ImpexConstants;
+import com.hd123.latin.impex.ImpexParams;
+import com.hd123.latin.util.JsonUtil;
+import com.hd123.latin.util.LatinUtil;
+import com.hd123.hdpos4.controllers.common.Hdpos4Controller;
+import com.hd123.hdpos4.commons.service.config.module.H4ComponentRefOutput;
+import com.hd123.hdpos4.commons.service.config.module.H4ModuleService;
+import com.hd123.hdpos4.controllers.base.PrintUpd;
+import com.hd123.hdpos4.controllers.common.BCalcRefParams;
+import com.hd123.rumba.commons.lang.Assert;
+import com.hd123.rumba.commons.lang.StringUtil;
+import com.hd123.rumba.quartz.service.JobScheduleHandler;
+
+/**
+ * $!{tableInfo.comment}($!{tableInfo.name})控制层
+ *
+ * @author $!author
+ */
+@Controller
+@RequestMapping(value = "todo:url路径", produces = "application/json;charset=utf-8")
+public class $!{fileName} extends Hdpos4Controller {
+
+  // todo 需要在xml中注册beanId
+  @Autowired
+  private $!{tableInfo.name}Service $!{clazz}Service;
+  @Autowired
+  private NextBillNumberGenerator billNumberGererator;
+  @Autowired
+  private ModuleService moduleService;
+  @Autowired
+  private H4ModuleService h4ModuleService;
+  @Autowired
+  private DQueryService dQueryService;
+
+  @Override
+  protected void buildModuleContext(Map<String, Object> moduleContext, String moduleId) {
+    // todo 按前端页面配置来决定Arrays.asList的数据
+    super.buildModuleContext(moduleContext, moduleId, $!{tableInfo.name}s.MODULENO,
+            Arrays.asList("searchgrid", "form", "viewgrid"));
+  }
+
+  /**
+   * 创建一个单据对象
+   *
+   * @return
+   */
+  @RequestMapping(value = "create", method = RequestMethod.GET)
+  public @ResponseBody $!{tableInfo.name} create() throws LatinServiceException {
+    String cls = $!{tableInfo.name}s.BILLTYPE;
+    String billNumber = billNumberGererator.allocate(getSessionOrgCode(), P$!{tableInfo.name}.class.getName(),
+            cls);
+    $!{tableInfo.name} $!{clazz} = new $!{tableInfo.name}();
+    // todo 设置其他默认值
+    return $!{clazz};
+  }
+
+  /**
+   * @param modNum
+   *          修正单号，not null。
+   *
+   * @return
+   * @throws ParseException
+   * @throws IllegalArgumentException
+   */
+  @RequestMapping(value = "createForRevise", method = RequestMethod.GET)
+  public @ResponseBody $!{tableInfo.name} createForRevise(@RequestParam(value = "modNum")
+          String modNum, @RequestParam(value = "lstUpdTime")
+          String lstUpdTime) throws LatinServiceException, IllegalArgumentException, ParseException {
+    Assert.assertArgumentNotNull(modNum, "modNum");
+    $!{tableInfo.name} $!{clazz} = $!{clazz}Service.getByNumber(modNum, $!{tableInfo.name}s.FETCH_DETAILS_CUSTOMFIELDS);
+
+    // todo 修正逻辑
+
+    return $!{clazz};
+  }
+
+  /**
+   * 查询单据
+   *
+   * @param searchFilter
+   *          查询条件，not null。
+   * @return 单据分页。
+   */
+  @RequestMapping(value = "query", method = RequestMethod.POST)
+  public @ResponseBody DQueryResult<$!{tableInfo.name}> query(@RequestBody
+          QueryFilter queryFilter) {
+    DQueryDefinition dQueryDef = buildQueryDefinition(queryFilter);
+    dQueryDef = buildQuerySelect(dQueryDef);
+    DQueryResult<$!{tableInfo.name}> result = dQueryService.query($!{tableInfo.name}s.MODULEID, dQueryDef, $!{tableInfo.name}.class);
+
+    dQueryDef.getOrderBys().clear();
+    dQueryDef.getSelects().clear();
+    dQueryDef.setPage(0);
+    dQueryDef.setPageSize(0);
+
+    // todo 查询汇总的合计信息
+
+    return result;
+  }
+
+  /**
+   * 保存。
+   *
+   * @param $!{clazz}
+   *          单据json串。
+   * @return
+   */
+  @RequestMapping(value = "save", method = RequestMethod.POST)
+  public @ResponseBody String save(@RequestBody
+  $!{tableInfo.name} $!{clazz}, @RequestParam(value = "targetState")
+  int targetState, @RequestParam(value = "cacheKey", required = false)
+  String cacheKey) throws LatinServiceException {
+
+    // 从缓存中获取明细数据
+    if (!StringUtil.isNullOrBlank(cacheKey)) {
+      // todo 添加明细缓存， 有多个明细时主要添加多个缓存
+    }
+    return $!{clazz}Service.save($!{clazz}, targetState, getOperateContext());
+  }
+
+  /**
+   * 删除定单。
+   *
+   * @param id
+   *          单据标识，not null。
+   * @return
+   */
+  @RequestMapping(value = "remove", method = RequestMethod.POST)
+  @ResponseStatus(HttpStatus.OK)
+  public void remove(@RequestParam(value = "billNumber")
+          String billNumber, @RequestParam(value = "lstUpdTime")
+          String lstUpdTime) throws ParseException, LatinServiceException {
+
+      $!{clazz}Service.remove(billNumber, StringUtil.toDate(lstUpdTime, JsonUtil.DATE_FORMAT),
+            getOperateContext());
+  }
+
+  /**
+   * 改变单据业务状态。
+   *
+   * @param billNumber
+   *          单据标识，not null。
+   * @param lstUpdTime
+   *          版本号。
+   * @return
+   */
+  @RequestMapping(value = "changeBizState", method = RequestMethod.POST)
+  @ResponseStatus(HttpStatus.OK)
+  public void changeBizState(@RequestParam(value = "billNumber")
+          String billNumber, @RequestParam(value = "lstUpdTime")
+          String lstUpdTime, @RequestParam(value = "state")
+  int state) throws ParseException, LatinServiceException {
+    if (state % 100 == 10) {
+      // todo 增加作废校验逻辑
+    }
+      $!{clazz}Service.changeBizState(billNumber, StringUtil.toDate(lstUpdTime, JsonUtil.DATE_FORMAT),
+            state, getOperateContext());
+  }
+
+  /**
+   * 获取指定的$!{tableInfo.comment}单据。
+   *
+   * @param billNumber
+   *          $!{tableInfo.comment}单号，not null。
+   * @param fetchDetails
+   *          是否取出明细。
+   * @return $!{tableInfo.comment}。
+   */
+  @RequestMapping(value = "loadByNumber", method = RequestMethod.GET)
+  public @ResponseBody $!{tableInfo.name} loadByNumber(@RequestParam(value = "billNumber")
+          String billNumber, @RequestParam(value = "fetchDetailCustomFields")
+  boolean fetchDetailCustomFields) throws LatinServiceException {
+    // todo 执行查询业务
+    $!{tableInfo.name} $!{clazz} = $!{clazz}Service.getByNumber(billNumber,
+            fetchDetailCustomFields ? $!{tableInfo.name}s.FETCH_DETAILS_CUSTOMFIELDS : $!{tableInfo.name}s.FETCH_DETAILS);
+    return $!{clazz};
+  }
+
+  /**
+   * 获取上下单单号
+   *
+   * @param billNumber
+   *          当前单号。
+   * @return (上一单号，下一单号)
+   */
+  @RequestMapping(value = "getPrevNextNum", method = RequestMethod.GET)
+  public @ResponseBody List<String> getPrevNextNum(@RequestParam(value = "billNumber")
+          String billNumber) {
+    BillNumNaviParameter parameter = new BillNumNaviParameter();
+    parameter.setNum(billNumber).setQueryField("num").setQueryTable("$!{clazz}");
+
+    // todo 增加其他查询条件
+
+    return h4ModuleService.getPrevNextNum(parameter);
+  }
+
+  /**
+   * 计算自定义字段。
+   *
+   * @param moduleId
+   *          模块，not null。
+   * @param masterObj
+   *          主对象，not null。
+   * @return 自定义字段的值。
+   * @throws LatinServiceException
+   */
+  @RequestMapping(value = "calcs", method = RequestMethod.POST)
+  public @ResponseBody List<Map<String, String>> calcs(@RequestBody
+          BCalcRefParams params) {
+    $!{tableInfo.name} $!{clazz} = JsonUtil.jsonToObject(params.getMasterObj(), $!{tableInfo.name}.class);
+    //todo 明细行根据实际情况设置
+    List<Object> detailes = new ArrayList<>();
+    // List<$!{tableInfo.name}Detail> detailes = JsonUtil.jsonToArrayList(params.getDetailObj(),
+    //    $!{tableInfo.name}Detail.class);
+    List<Map<String, String>> results = detailCustomFieldService.calcs(params.getModuleId(),
+            params.getComponentName(), $!{clazz}, detailes);
+    return results;
+
+  }
+
+  @RequestMapping(value = "calcReferences", method = RequestMethod.POST)
+  public @ResponseBody H4ComponentRefOutput calcReferences(@RequestBody
+          BCalcRefParams params) {
+    $!{tableInfo.name} $!{clazz} = JsonUtil.jsonToObject(params.getMasterObj(), $!{tableInfo.name}.class);
+    // todo 替换成明细行
+    Object d = null;
+    // $!{tableInfo.name}Detail d = JsonUtil.jsonToObject(params.getDetailObj(), $!{tableInfo.name}Detail.class);
+    H4ComponentRefOutput reference = h4ModuleService.calcReferences(params.getModuleId(),
+            params.getComponentName(), params.getGdGid(), $!{clazz}, d);
+    return reference;
+  }
+
+  /**
+   * 汇总导入。
+   *
+   * @param params
+   *          导入参数。
+   * @return
+   * @throws LatinServiceException
+   */
+  @RequestMapping(value = "importForStandard", method = RequestMethod.POST)
+  public @ResponseBody JobScheduleHandler importForStandard(@RequestBody
+          ImpexParams params) throws LatinServiceException {
+
+    // todo 汇总导入按需添加
+    return null;
+  }
+
+  /**
+   * 明细界面导入。
+   *
+   * @param params
+   *          导入参数。
+   * @return
+   * @throws LatinServiceException
+   */
+  // todo 明细导入按实际导入类编写代码
+  // @RequestMapping(value = "importForDetail", method = RequestMethod.POST)
+  // public @ResponseBody JobScheduleHandler importForDetail(@RequestBody
+  //   $!{tableInfo.name}ImportParams params) throws LatinServiceException {
+  //
+  // todo 明细导入按需添加
+  //   return null;
+  // }
+
+  /**
+  * 更新打印时间。
+  *
+  * @param billNumber
+  *          单号，not null。
+  */
+  @RequestMapping(value = "updatePrintTime", method = RequestMethod.POST)
+  public @ResponseBody PrintUpd updatePrintTime(@RequestParam(value = "billNumber")
+          String billNumber) {
+    ModuleQueryParameter parameter = new ModuleQueryParameter().setQueryTable("$!{clazz}")
+                                                               .setQueryField("prnTime").addWhere("cls = '" + $!{tableInfo.name}s.BILLTYPE + "'")
+                                                               .addWhere("num = ?", billNumber);
+
+    moduleService.updateTime(parameter, LatinUtil.operCtxConverter(getOperateContext()));
+    PrintUpd result = new PrintUpd();
+    result.setPrnTime(getOperateContext().getTime());
+    return result;
+  }
+
+  /**
+   * 获取缓存对象类
+   */
+  @Override
+  protected Class getCacheEntityCls() {
+    // todo 替换成明细对象
+    return Object.class;
+  }
+
+  private DQueryDefinition buildQuerySelect(DQueryDefinition dQueryDef) {
+    dQueryDef.addSelect("o.*");
+    //todo 增加其他关联语句
+    return dQueryDef;
+  }
+
+  private DQueryDefinition buildQueryDefinition(QueryFilter queryFilter) {
+    DQueryDefinition dQueryDef = new DQueryDefinition();
+
+    dQueryDef.addFrom("$!{clazz}", "o");
+
+    // todo 增加其他查询条件
+
+    return dQueryDef;
+  }
+
+}

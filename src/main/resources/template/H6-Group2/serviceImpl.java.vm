@@ -1,0 +1,134 @@
+##定义初始变量
+#set($fileName = $tool.append($tableInfo.name, "ServiceImpl"))
+#set($clazz = $!tool.firstLowerCase($!{tableInfo.name}))
+
+##设置回调
+$!callback.setFileName($tool.append($fileName, ".java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/service/impl"))
+
+##拿到主键
+#if(!$tableInfo.pkColumn.isEmpty())
+  #set($pk = $tableInfo.pkColumn.get(0))
+#end
+
+/**
+ * 版权所有(C)，上海海鼎信息工程股份有限公司，${year.vm}，所有权利保留。
+ *
+ * 项目名：$!{module}
+ * 文件名：$!{fileName}.java
+ * 模块说明：
+ * 修改历史：
+ * ${year.vm}年${month.vm}月${day.vm}日 - ${author} - 创建。
+ */
+
+#if($tableInfo.savePackageName)package $!{tableInfo.savePackageName}.#{end}service.impl;
+
+
+import java.util.Date;
+import javax.persistence.PersistenceException;
+import $!{tableInfo.savePackageName}.$!{tableInfo.name};
+import $!{tableInfo.savePackageName}.dao.$!{tableInfo.name}Dao;
+import $!{tableInfo.savePackageName}.service.$!{tableInfo.name}Service;
+import com.hd123.hdpos4.biz.BillState;
+import com.hd123.latin.biz.entity.LOperateContext;
+import com.hd123.latin.biz.query.HQueryResult;
+import com.hd123.latin.dao.International;
+import com.hd123.latin.exception.LatinServiceException;
+import com.hd123.latin.util.ApplicationContextUtils;
+import com.hd123.latin.util.LatinUtil;
+import com.hd123.latin.util.LoopWatch;
+import com.hd123.rumba.commons.biz.query.QueryDefinition;
+import com.hd123.rumba.commons.lang.Assert;
+import com.hd123.rumba.commons.lang.StringUtil;
+
+
+/**
+ * $!{tableInfo.comment}($!{tableInfo.name})服务实现类
+ *
+ * @author $!author
+ */
+public class $!{fileName} implements $!{tableInfo.name}Service {
+
+  @Override
+  @International(reverse = true)
+  public String save($!{tableInfo.name} $!{clazz}, int targetState, LOperateContext operCtx)
+        throws LatinServiceException {
+    Assert.assertArgumentNotNull($!{clazz}, "$!{clazz}");
+    Assert.assertArgumentNotNull(targetState, "targetState");
+    Assert.assertArgumentNotNull(operCtx, "operCtx");
+    // todo 前置处理...
+
+    // todo 保存单据
+    String billNumber = null;
+    LoopWatch loopWatch = new LoopWatch();
+    while (true) {
+      try {
+        billNumber = get$!tool.firstUpperCase($!{tableInfo.name})Dao().save($!{clazz}, targetState, operCtx);
+        break;
+      } catch (PersistenceException e) {
+        if (loopWatch.consume().stoped()) {
+          throw e;
+        }
+        if (LatinUtil.isPrimaryKeyException(e)) {
+          // todo 重置单号
+        } else {
+          throw e;
+        }
+      }
+    }
+    return billNumber;
+  }
+
+  @Override
+  public void remove(String billNumber, Date lstUpdTime, LOperateContext operCtx)
+      throws LatinServiceException {
+    Assert.assertArgumentNotNull(billNumber, "billNumber");
+    Assert.assertArgumentNotNull(lstUpdTime, "lstUpdTime");
+    Assert.assertArgumentNotNull(operCtx, "operCtx");
+    $!{tableInfo.name} $!{clazz} = safeGet(billNumber, lstUpdTime);
+    if (BillState.INITIAL != $!{clazz}.getStat()) {
+      // todo 非未审核的单据不允许保存
+    }
+    get$!tool.firstUpperCase($!{tableInfo.name})Dao().remove($!{clazz}, operCtx);
+  }
+
+  @Override
+  public void changeBizState(String billNumber, Date lstUpdTime, int state, LOperateContext operCtx)
+      throws LatinServiceException {
+    // todo fetch定义
+    $!{tableInfo.name} $!{clazz} = safeGet(billNumber, lstUpdTime, "todo: 取明细数据");
+
+    if (state % 100 == 10) {
+      // todo 作废场景下的校验
+    }
+
+    get$!tool.firstUpperCase($!{tableInfo.name})Dao().changeBizState($!{clazz}.getNum(), state, operCtx);
+  }
+
+  @Override
+  public $!{tableInfo.name} getByNumber(String billNumber, String... fetchParts) {
+    if (StringUtil.isNullOrBlank(billNumber))
+      return null;
+    return get$!tool.firstUpperCase($!{tableInfo.name})Dao().getByNumber(billNumber, fetchParts);
+  }
+
+  @Override
+  public HQueryResult<$!{tableInfo.name}> query(QueryDefinition definition, String... fetchParts) {
+    Assert.assertArgumentNotNull(definition, "definition");
+    return get$!tool.firstUpperCase($!{tableInfo.name})Dao().query(definition, fetchParts);
+  }
+
+  private $!{tableInfo.name} safeGet(String billNumber, Date lstUpdTime, String... fetchParts) {
+    Assert.assertArgumentNotNull(billNumber, "billNumber");
+    Assert.assertArgumentNotNull(lstUpdTime, "lstUpdTime");
+    $!{tableInfo.name} $!{clazz} = get$!tool.firstUpperCase($!{tableInfo.name})Dao().getByNumber(billNumber, fetchParts);
+
+    // todo 安全校验
+
+    return $!{clazz};
+  }
+
+  private $!{tableInfo.name}Dao get$!tool.firstUpperCase($!{tableInfo.name})Dao() {
+    return ApplicationContextUtils.getBean($!{tableInfo.name}Dao.DEFAULT_CONTEXT_ID, $!{tableInfo.name}Dao.class);
+  }
+}

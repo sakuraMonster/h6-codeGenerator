@@ -1,0 +1,104 @@
+##定义初始变量
+#set($fileName = $tool.append($tableInfo.name, "Service"))
+##设置回调
+$!callback.setFileName($tool.append($fileName, ".java"))
+$!callback.setSavePath($tool.append($tableInfo.savePath, "/service"))
+
+##拿到主键
+#if(!$tableInfo.pkColumn.isEmpty())
+    #set($pk = $tableInfo.pkColumn.get(0))
+#end
+
+/**
+ * 版权所有(C)，上海海鼎信息工程股份有限公司，${year.vm}，所有权利保留。
+ *
+ * 项目名：$!{module}
+ * 文件名：$!{fileName}.java
+ * 模块说明：
+ * 修改历史：
+ * ${year.vm}年${month.vm}月${day.vm}日 - ${author} - 创建。
+ */
+
+#if($tableInfo.savePackageName)package $!{tableInfo.savePackageName}.#{end}service;
+
+import $!{tableInfo.savePackageName}.$!{tableInfo.name};
+import com.hd123.latin.biz.entity.LOperateContext;
+import com.hd123.latin.biz.query.HQueryResult;
+import com.hd123.latin.exception.LatinServiceException;
+import com.hd123.rumba.commons.biz.query.QueryDefinition;
+
+import java.util.Date;
+
+/**
+ * $!{tableInfo.comment}($!{tableInfo.name})服务接口
+ *
+ * @author $!author
+ */
+public interface $!{fileName} {
+
+  /** 用于在Spring容器的默认ID。 */
+  // todo xml中注册bean的id
+  public static final String DEFAULT_CONTEXT_ID = "todo: 注册service的beanId";
+
+  /**
+   *  保存$!{tableInfo.comment}。
+   *
+   * @param $!tool.firstLowerCase($!{tableInfo.name})
+   *          $!{tableInfo.comment}, not null。
+   * @param targetState
+   *          目标状态, not null。
+   * @param operCtx
+  操作信息, not null。
+   */
+  String save($!{tableInfo.name} $!tool.firstLowerCase($!{tableInfo.name}), int targetState, LOperateContext operCtx)
+          throws LatinServiceException;
+
+  /**
+   * 删除$!{tableInfo.comment}。
+   *
+   * @param billNumber
+   *          单号，not null。
+   * @param lstUpdTime
+   *          最后修改时间，not null。
+   * @param operCtx
+   *          操作信息，not null。
+   */
+  void remove(String billNumber, Date lstUpdTime, LOperateContext operCtx)
+          throws LatinServiceException;
+
+  /**
+   * 更改业务状态。
+   *
+   * @param billNumber
+   *          单号，not null。
+   * @param lstupdTime
+   *          最后修改时间。
+   * @param state
+   *          目标状态，not null。
+   * @param operCtx
+   *          操作信息，not null。
+   */
+  void changeBizState(String billNumber, Date lstupdTime, int state, LOperateContext operCtx)
+          throws LatinServiceException;
+
+  /**
+   * 获取指定条件的单据。
+   *
+   * @param billNumber
+   *          单号，not null。
+   * @param fetchParts
+   * @return $!{tableInfo.comment}。
+   */
+  $!{tableInfo.name} getByNumber(String billNumber, String... fetchParts);
+
+  /**
+   * $!{tableInfo.comment}。
+   *
+   * @param definition
+   *          查询条件定义，not null。
+   * @param fetchParts
+   * @return 分页信息。
+   */
+  HQueryResult<$!{tableInfo.name}> query(QueryDefinition definition, String... fetchParts);
+
+}

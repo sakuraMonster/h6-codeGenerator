@@ -1,18 +1,39 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.sakuramonster.h6codegenerator</id>
+    <id>com.zxj.h6codegenerator</id>
     <name>h6-codeGenerator</name>
     <vendor>sakuramonster</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <!--通过类生成代码，需要依赖Java插件-->
+    <depends>com.intellij.modules.java</depends>
+    <!--必须依赖Database Tool插件-->
+    <depends>com.intellij.database</depends>
+    <depends>com.intellij.modules.ultimate</depends>
+    <depends>com.sjhy.plugin.easycode</depends>
+
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
+    <!--    <extensions defaultExtensionNs="com.intellij">-->
+    <!--        <toolWindow factoryClass="com.github.sakuramonster.monsterplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>-->
+    <!--    </extensions>-->
+
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.sakuramonster.h6codegenerator.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <projectService serviceInterface="com.zxj.h6.codegenerator.service.CodeGenerateService" serviceImplementation="com.zxj.h6.codegenerator.service.impl.CodeGenerateServiceImpl"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.sakuramonster.h6codegenerator.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.zxj.h6.codegenerator.listener.InitMainActionGroupListener" topic="com.intellij.openapi.application.ApplicationActivationListener" />
     </applicationListeners>
+
+
+    <actions>
+        <!-- Add your actions here -->
+        <group id="con.zxj.h6.codegenerator.action" class="com.zxj.h6.codegenerator.actions.MainActionGroup" text="h6-codeGenerator"
+               popup="true">
+            <!--生成代码菜单-->
+            <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
+        </group>
+    </actions>
 </idea-plugin>
