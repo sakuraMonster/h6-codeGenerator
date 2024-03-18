@@ -309,12 +309,12 @@ public class NewSelectSavePath extends DialogWrapper {
       }
     }
     // 保存配置
-    TableInfo tableInfo;
-    if(!entityMode) {
-      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
-    } else {
-      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectPsiClass());
-    }
+    TableInfo tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectPsiClass());
+//    if(!entityMode) {
+//      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
+//    } else {
+//      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectPsiClass());
+//    }
 
     tableInfo.setSavePath(savePath);
     tableInfo.setSavePackageName(packageField.getText());
