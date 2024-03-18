@@ -309,7 +309,7 @@ public class NewSelectSavePath extends DialogWrapper {
       }
     }
     // 保存配置
-    TableInfo tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectPsiClass());
+    TableInfo tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
 //    if(!entityMode) {
 //      tableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
 //    } else {
