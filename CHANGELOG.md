@@ -4,4 +4,5 @@
 
 ## [Unreleased]
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+- 初始化h6-codeGenerator
+- 基于数据库支持h6的后端基础代码生成
