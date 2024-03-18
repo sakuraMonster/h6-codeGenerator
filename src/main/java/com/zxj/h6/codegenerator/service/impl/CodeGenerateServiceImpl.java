@@ -91,15 +91,8 @@ public class CodeGenerateServiceImpl implements CodeGenerateService {
     @Override
     public void generate(Collection<Template> templates, GenerateOptions generateOptions, String sourceSql) {
         // 获取选中表信息
-        TableInfo selectedTableInfo;
-        List<TableInfo> tableInfoList;
-        if (Boolean.TRUE.equals(generateOptions.getEntityModel())) {
-            selectedTableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectPsiClass());
-            tableInfoList = cacheDataUtils.getPsiClassList().stream().map(item -> tableInfoService.getTableInfo(item)).collect(Collectors.toList());
-        } else {
-            selectedTableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
-            tableInfoList = cacheDataUtils.getDbTableList().stream().map(item -> tableInfoService.getTableInfo(item)).collect(Collectors.toList());
-        }
+        TableInfo selectedTableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());;
+        List<TableInfo> tableInfoList = cacheDataUtils.getDbTableList().stream().map(item -> tableInfoService.getTableInfo(item)).collect(Collectors.toList());
         // 校验选中表的保存路径是否正确
         if (StringUtils.isNullOrBlank(selectedTableInfo.getSavePath())) {
             if (selectedTableInfo.getObj() != null) {
