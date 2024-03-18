@@ -97,9 +97,6 @@ public class CodeGenerateServiceImpl implements CodeGenerateService {
         if (StringUtils.isNullOrBlank(selectedTableInfo.getSavePath())) {
             if (selectedTableInfo.getObj() != null) {
                 Messages.showInfoMessage(selectedTableInfo.getObj().getName() + "表配置信息不正确，请尝试重新配置", GlobalDict.TITLE_INFO);
-            } else if (selectedTableInfo.getPsiClassObj() != null) {
-                PsiClass psiClassObj = (PsiClass) selectedTableInfo.getPsiClassObj();
-                Messages.showInfoMessage(psiClassObj.getName() + "类配置信息不正确，请尝试重新配置", GlobalDict.TITLE_INFO);
             } else {
                 Messages.showInfoMessage("配置信息不正确，请尝试重新配置", GlobalDict.TITLE_INFO);
             }
