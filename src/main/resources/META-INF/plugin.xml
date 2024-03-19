@@ -9,7 +9,6 @@
     <depends>com.intellij.modules.java</depends>
     <!--必须依赖Database Tool插件-->
     <depends>com.intellij.database</depends>
-    <depends>com.intellij.modules.ultimate</depends>
     <depends>com.sjhy.plugin.easycode</depends>
 
 

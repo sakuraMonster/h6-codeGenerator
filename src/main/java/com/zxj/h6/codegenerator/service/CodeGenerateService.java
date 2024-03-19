@@ -2,9 +2,9 @@ package com.zxj.h6.codegenerator.service;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import com.sjhy.plugin.dto.GenerateOptions;
 import com.sjhy.plugin.entity.TableInfo;
 import com.sjhy.plugin.entity.Template;
+import com.zxj.h6.codegenerator.option.GenerateOption;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -29,9 +29,9 @@ public interface CodeGenerateService {
      * 生成
      *
      * @param templates       模板
-     * @param generateOptions 生成选项
+     * @param generateOption 生成选项
      */
-    void generate(Collection<Template> templates, GenerateOptions generateOptions, String sourceSql);
+    void generate(Collection<Template> templates, GenerateOption generateOption, String sourceSql);
 
     /**
      * 生成代码
