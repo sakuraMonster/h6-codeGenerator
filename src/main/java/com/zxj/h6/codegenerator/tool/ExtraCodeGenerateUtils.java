@@ -1,9 +1,9 @@
 package com.zxj.h6.codegenerator.tool;
 
-import com.sjhy.plugin.dto.GenerateOptions;
 import com.sjhy.plugin.entity.TableInfo;
 import com.sjhy.plugin.entity.Template;
 import com.sjhy.plugin.tool.CurrGroupUtils;
+import com.zxj.h6.codegenerator.option.GenerateOption;
 import com.zxj.h6.codegenerator.service.impl.CodeGenerateServiceImpl;
 import com.zxj.h6.codegenerator.sqlparser.SqlParser;
 
@@ -28,12 +28,12 @@ public class ExtraCodeGenerateUtils {
     /**
      * 生成配置
      */
-    private GenerateOptions generateOptions;
+    private GenerateOption generateOption;
 
-    public ExtraCodeGenerateUtils(CodeGenerateServiceImpl codeGenerateService, TableInfo tableInfo, GenerateOptions generateOptions) {
+    public ExtraCodeGenerateUtils(CodeGenerateServiceImpl codeGenerateService, TableInfo tableInfo, GenerateOption generateOption) {
         this.codeGenerateService = codeGenerateService;
         this.tableInfo = tableInfo;
-        this.generateOptions = generateOptions;
+        this.generateOption = generateOption;
     }
 
     /**
@@ -55,7 +55,7 @@ public class ExtraCodeGenerateUtils {
         }
         // 生成代码
         codeGenerateService.generate(Collections.singletonList(currTemplate),
-                Collections.singletonList(this.tableInfo), this.generateOptions,
+                Collections.singletonList(this.tableInfo), this.generateOption,
                 new SqlParser(new StringBuffer()),
                 param);
     }

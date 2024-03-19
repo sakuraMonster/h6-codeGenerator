@@ -31,6 +31,7 @@ import com.sjhy.plugin.tool.ModuleUtils;
 import com.sjhy.plugin.tool.ProjectUtils;
 import com.sjhy.plugin.tool.StringUtils;
 import com.sjhy.plugin.ui.component.TemplateSelectComponent;
+import com.zxj.h6.codegenerator.option.GenerateOption;
 import com.zxj.h6.codegenerator.service.CodeGenerateService;
 import org.jetbrains.annotations.Nullable;
 
@@ -328,7 +329,7 @@ public class NewSelectSavePath extends DialogWrapper {
     tableInfoService.saveTableInfo(tableInfo);
 
     // 生成代码
-    codeGenerateService.generate(selectTemplateList, getGenerateOptions(), sourceSql);
+    codeGenerateService.generate(selectTemplateList, getGenerateOption(), sourceSql);
   }
 
   /**
@@ -350,9 +351,8 @@ public class NewSelectSavePath extends DialogWrapper {
    *
    * @return {@link GenerateOptions}
    */
-  private GenerateOptions getGenerateOptions() {
-    return GenerateOptions.builder()
-                          .entityModel(this.entityMode)
+  private GenerateOption getGenerateOption() {
+    return GenerateOption.builder()
                           .reFormat(reFormatCheckBox.isSelected())
                           .titleSure(titleSureCheckBox.isSelected())
                           .titleRefuse(titleRefuseCheckBox.isSelected())
