@@ -2,7 +2,22 @@
 <idea-plugin>
     <id>com.zxj.h6codegenerator</id>
     <name>h6-codeGenerator</name>
-    <vendor>sakuramonster</vendor>
+    <vendor email="86142718@qq.com">sakuramonster</vendor>
+
+    <description><![CDATA[
+      <tag>EasyCode,Easy Code,easy,code,code generate,code tools</tag>
+      <h3>English:</h3>
+      <ul>
+      <li>The code generation plug-in based on IntelliJ IDEA is developed to support custom templates (Java, HTML, JS, XML).</li>
+      <li>Support custom templates to develop their own code templates.</li>
+      <li>It can extract the comment and generate the corresponding hump rule code from the table construction sentence, and solve the problem of non-standard database field hump and database comment.</li>
+      </ul>
+      <h3>中文：</h3>
+      <ul>
+      <li>基于IntelliJ IDEA和EasyCode开发的代码生成插件，支持自定义任意模板（Java，html，js，xml）。</li>
+      <li>支持自定义模版开发属于自己的代码模板。</li>
+      <li>支持从建表语句中提取注释以及对应的驼峰规则生成代码，解决数据库字段非标准驼峰以及数据库注释的问题。</li>
+      </ul>]]></description>
 
     <depends>com.intellij.modules.platform</depends>
     <!--通过类生成代码，需要依赖Java插件-->
