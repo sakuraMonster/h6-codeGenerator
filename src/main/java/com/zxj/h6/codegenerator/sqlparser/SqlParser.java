@@ -135,6 +135,8 @@ public class SqlParser {
     }
     tableName = matcher.group(1);
     tableComment = matcher.group(2);
+    tableNameMap.put(tableName.toLowerCase(), tableName);
+    tableCommentMap.put(tableName.toLowerCase(), tableComment);
 
     regex = "\\bCREATE\\s+TABLE\\s+IF\\s+NOT\\s+EXISTS\\s+(\\w+)\\s*(?:\\s*\\(\\s*" + commentSymbol + "\\s*([\\p{L} \\d]+)?)?";
     pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -142,6 +144,8 @@ public class SqlParser {
     if (matcher.find()) {
       tableName = matcher.group(1);
       tableComment = matcher.group(2);
+      tableNameMap.put(tableName.toLowerCase(), tableName);
+      tableCommentMap.put(tableName.toLowerCase(), tableComment);
     }
     return true;
   }
@@ -170,6 +174,7 @@ public class SqlParser {
     tableName = matcher.group(1);
     tableComment = matcher.group(2);
     tableNameMap.put(tableName.toLowerCase(), tableName);
+    tableCommentMap.put(tableName.toLowerCase(), tableComment);
 
     regex = "CREATE\\s+TABLE\\s+IF\\s+NOT\\s+EXISTS\\s+(\\w+)\\s*(?:\\s*\\(\\s*" + commentSymbol + "\\s*([\\p{L} \\d]+)?)?";
     pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -177,6 +182,7 @@ public class SqlParser {
     if (matcher.find()) {
       tableName = matcher.group(1);
       tableComment = matcher.group(2);
+      tableNameMap.put(tableName.toLowerCase(), tableName);
       tableCommentMap.put(tableName.toLowerCase(), tableComment);
     }
     return true;
