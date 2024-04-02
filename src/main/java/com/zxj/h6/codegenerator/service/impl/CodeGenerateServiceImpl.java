@@ -90,7 +90,7 @@ public class CodeGenerateServiceImpl implements CodeGenerateService {
     @Override
     public void generate(Collection<Template> templates, GenerateOption generateOption, String sourceSql) {
         // 获取选中表信息
-        TableInfo selectedTableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());;
+        TableInfo selectedTableInfo = tableInfoService.getTableInfo(cacheDataUtils.getSelectDbTable());
         List<TableInfo> tableInfoList = cacheDataUtils.getDbTableList().stream().map(item -> tableInfoService.getTableInfo(item)).collect(Collectors.toList());
         // 校验选中表的保存路径是否正确
         if (StringUtils.isNullOrBlank(selectedTableInfo.getSavePath())) {
