@@ -14,6 +14,8 @@ package com.zxj.h6.codegenerator.service.impl.replacer;
  */
 public class PathConstants {
 
+  public static final String BASE_SYS_CORE = "hdpos4-sys-core";
+
   public static final String BASE_TEMPLATE_API = "hdpos4-template-api";
 
   public static final String BASE_TEMPLATE_CORE = "hdpos4-template-core";

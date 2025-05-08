@@ -22,7 +22,8 @@ public enum ProjectModuleType {
   Prom("prom", "促销"),
   Sys("sys", "系统"),
   Wms("wms", "物流"),
-  Wrh("wrh", "仓库");
+  Wrh("wrh", "仓库"),
+  Template("template", "模版");
 
   private String code;
   private String name;

@@ -11,10 +11,12 @@ package com.zxj.h6.codegenerator.service.impl.replacer;
 
 import com.zxj.h6.codegenerator.entity.SettingsStorageDTO;
 import com.zxj.h6.codegenerator.service.SettingsStorageService;
-import com.zxj.h6.codegenerator.service.impl.template.TemplatePackageSufixs;
+import com.zxj.h6.codegenerator.service.impl.template.TemplateConstants;
 import com.zxj.h6.codegenerator.tool.GlobalDict;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +30,7 @@ public class ModuleConfig {
   private final Integer targetModuleNo;
   private final String targetModuleName;
   private final Map<String, String> caseVariations;
+  private final List<BeanRegistrationConfig> beanRegistrations;
 
   public ModuleConfig(String sourceModuleId, Integer sourceModuleNo, String targetModuleId, Integer targetModuleNo,
           String targetModuleName) {
@@ -37,6 +40,11 @@ public class ModuleConfig {
     this.targetModuleNo = targetModuleNo;
     this.targetModuleName = targetModuleName;
     this.caseVariations = generateCaseVariations(sourceModuleId, targetModuleId);
+    this.beanRegistrations = new ArrayList<>();
+  }
+
+  public void addBeanRegistration(BeanRegistrationConfig config) {
+    this.beanRegistrations.add(config);
   }
 
   private Map<String, String> generateCaseVariations(String original, String replacement) {
@@ -63,13 +71,16 @@ public class ModuleConfig {
     // 替换包名中的模块名
     variations.put("." + PathConstants.BASE_TEMPLATE_MODULE + ".", "." + targetModuleName + ".");
 
-    TemplatePackageSufixs.sufixs.forEach((key, value) -> {
+    TemplateConstants.packageSufixs.forEach((key, value) -> {
       // 包路径替换成小写
       variations.put(value.replace("/", "."), targetModuleId.toLowerCase());
     });
 
     // 替换JS文件中的模块名
     variations.put("'Template.", "'" + targetModuleName.substring(0, 1).toUpperCase() + targetModuleName.substring(1) + ".");
+
+    // 替换XML文件中的模块名
+    variations.put("-template-", "-" + targetModuleName + "-");
 
     // 替换文件的创建人
     SettingsStorageDTO settingsStorageDto = SettingsStorageService.getSettingsStorage();
@@ -91,4 +102,8 @@ public class ModuleConfig {
   public String getNewModuleId() {
     return targetModuleId;
   }
-}    
+
+  public List<BeanRegistrationConfig> getBeanRegistrations() {
+    return beanRegistrations;
+  }
+}

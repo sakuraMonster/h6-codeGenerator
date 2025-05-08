@@ -14,14 +14,18 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.zxj.h6.codegenerator.service.NewCodeGenerateService;
+import com.zxj.h6.codegenerator.service.impl.replacer.BeanRegistrationConfig;
 import com.zxj.h6.codegenerator.service.impl.replacer.FileProcessor;
 import com.zxj.h6.codegenerator.service.impl.replacer.ModuleConfig;
 import com.zxj.h6.codegenerator.service.impl.replacer.PathConstants;
 import com.zxj.h6.codegenerator.service.impl.template.PackageType;
-import com.zxj.h6.codegenerator.service.impl.template.TemplatePackageSufixs;
+import com.zxj.h6.codegenerator.service.impl.template.TemplateConstants;
 import com.zxj.h6.codegenerator.tool.ClassBasedGenerator;
 import com.zxj.h6.codegenerator.service.impl.template.ProjectModuleType;
 import com.zxj.h6.codegenerator.service.impl.template.TemplateType;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author zhangxuejun
@@ -51,17 +55,18 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
           String moduleId, Integer moduleNo) {
 
     logger.info("Starting module replacement...");
+    String basePath = project.getBasePath();
 
     ModuleConfig config = new ModuleConfig(templateType.getModuleId(), templateType.getModuleNo(),
             moduleId, moduleNo, projectModuleType.getCode());
 
-    String basePath = project.getBasePath();
-
     try {
       for (PackageType packageType : PackageType.values()) {
+        // 先清除配置
+        config.getBeanRegistrations().clear();
         String sourceDir = basePath + "/" + TEMP_HOLDER_CHAR + "/" + PathConstants.BASE_PACKAGE
                 + "/" + PathConstants.BASE_TEMPLATE_MODULE
-                + "/" + packageType.name() + "/" + TemplatePackageSufixs.sufixs.get(templateType.getModuleId());
+                + "/" + packageType.name() + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
         String targetDir = basePath + "/" + TEMP_HOLDER_CHAR + "/" + PathConstants.BASE_PACKAGE
                 + "/" + projectModuleType.getCode() + "/" + packageType.name() + "/" + moduleId.toLowerCase();
         switch (packageType) {
@@ -70,6 +75,59 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
           targetDir = targetDir.replace(TEMP_HOLDER_CHAR,
                   PathConstants.BASE_TEMPLATE_API.replace(PathConstants.BASE_TEMPLATE_MODULE,
                           projectModuleType.getCode()));
+
+          // 目标文件
+          String targetServerXmlFile = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE.replace(
+                  PathConstants.BASE_TEMPLATE_MODULE,
+                  projectModuleType.getCode()) + "/" + TemplateConstants.serverXmls.get(
+                                                                                templateType.getModuleId())
+                                                                                   .replace(
+                                                                                           ProjectModuleType.Template.getCode(),
+                                                                                           projectModuleType.getCode());
+          String targetLogXmlFile = basePath + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.logXmls.get(
+                                                                                templateType.getModuleId());
+
+          String targetSysXmlFile = basePath + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.sysXmls.get(
+                  templateType.getModuleId());
+
+          String targetMsgXmlFile = basePath + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.msgXmls.get(
+                  templateType.getModuleId());
+
+          switch (templateType) {
+            case BillTemplateA:
+              BeanRegistrationConfig serverXmlConfig = new BeanRegistrationConfig(
+                      targetServerXmlFile, "\\s*</beans>",
+                      TemplateConstants.serverXmlContexts.get(templateType.getModuleId()), true, true);
+              config.addBeanRegistration(serverXmlConfig);
+
+              Map<String, String> logBeanTemplates = new HashMap<>();
+              logBeanTemplates.put(TemplateConstants.LOG_BEANID, TemplateConstants.logXmlContexts.get(templateType.getModuleId()));
+              BeanRegistrationConfig logXmlConfig = new BeanRegistrationConfig(
+                      targetLogXmlFile, null,
+                      logBeanTemplates, false, true, "tables");
+              config.addBeanRegistration(logXmlConfig);
+
+              Map<String, String> sysDqueryBeanTemplates = new HashMap<>();
+              sysDqueryBeanTemplates.put(TemplateConstants.SYS_DQUERY_BEANID,
+                      TemplateConstants.sysDqueryXmlContexts.get(templateType.getModuleId()));
+              BeanRegistrationConfig sysDqueryXmlConfig = new BeanRegistrationConfig(
+                      targetSysXmlFile, null,
+                      sysDqueryBeanTemplates, false, true, "constClassNames");
+              config.addBeanRegistration(sysDqueryXmlConfig);
+
+              Map<String, String> msgBeanTemplates = new HashMap<>();
+              msgBeanTemplates.put(TemplateConstants.CLIENT_MESSSAGE_BEANID, TemplateConstants.msgXmlClientContexts.get(templateType.getModuleId()));
+              msgBeanTemplates.put(TemplateConstants.SERVER_MESSSAGE_BEANID, TemplateConstants.msgXmlServerContexts.get(templateType.getModuleId()));
+              msgBeanTemplates.put(TemplateConstants.COMBO_MESSSAGE_BEANID, TemplateConstants.msgXmlComboContexts.get(templateType.getModuleId()));
+              BeanRegistrationConfig msgXmlConfig = new BeanRegistrationConfig(
+                      targetMsgXmlFile, null,
+                      msgBeanTemplates, false, true, "moduleMap");
+              config.addBeanRegistration(msgXmlConfig);
+              break;
+            default:
+              break;
+            }
+
           break;
         case dao:
         case impl:
@@ -81,7 +139,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
         case controllers:
           sourceDir = basePath + "/" + PathConstants.BASE_WEB + "/" + PathConstants.BASE_PACKAGE + "/" + packageType.name()
                   + "/" + PathConstants.BASE_TEMPLATE_MODULE
-                  + "/" + TemplatePackageSufixs.sufixs.get(templateType.getModuleId());
+                  + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
           targetDir = basePath + "/" + PathConstants.BASE_WEB + "/" + PathConstants.BASE_PACKAGE + "/" + packageType.name()
                   + "/" + projectModuleType.getCode()
                   + "/" + moduleId.toLowerCase();
@@ -89,7 +147,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
         case extStore:
           sourceDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
                   + "/" + PathConstants.BASE_TEMPLATE_MODULE
-                  + "/" + PathConstants.BASE_EXT_STORE + "/" + TemplatePackageSufixs.sufixs.get(templateType.getModuleId());
+                  + "/" + PathConstants.BASE_EXT_STORE + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
           targetDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
                   + "/" + projectModuleType.getCode() + "2"
                   + "/" + PathConstants.BASE_EXT_STORE + "/" + moduleId.toLowerCase();
@@ -97,7 +155,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
         case extView:
           sourceDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
                   + "/" + PathConstants.BASE_TEMPLATE_MODULE
-                  + "/" + PathConstants.BASE_EXT_VIEW + "/" + TemplatePackageSufixs.sufixs.get(templateType.getModuleId());
+                  + "/" + PathConstants.BASE_EXT_VIEW + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
           targetDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
                   + "/" + projectModuleType.getCode() + "2"
                   + "/" + PathConstants.BASE_EXT_VIEW + "/" + moduleId.toLowerCase();
@@ -111,6 +169,8 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+
 
     logger.info("Module replacement completed successfully!");
   }

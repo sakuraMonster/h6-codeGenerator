@@ -19,8 +19,10 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -67,6 +69,181 @@ public class FileProcessor {
     Files.walk(sourceDir)
          .filter(Files::isRegularFile)
          .forEach(this::processFile);
+
+    // 处理Bean注册
+    processBeanRegistrations();
+  }
+
+  public void processBeanRegistrations() {
+    for (BeanRegistrationConfig regConfig : config.getBeanRegistrations()) {
+      try {
+        Path targetFile = Paths.get(regConfig.getTargetFile());
+        if (!Files.exists(targetFile)) {
+          System.err.println("Target file does not exist: " + targetFile);
+          continue;
+        }
+
+        // 读取目标文件内容
+        String content = new String(Files.readAllBytes(targetFile));
+
+        // 准备要插入的Bean注册内容
+        Map<String, String> beanContents = prepareBeanContent(regConfig.getBeanTemplates());
+
+        // 在指定位置插入Bean注册
+        // 在指定位置插入Bean注册
+        String newContent;
+        if (regConfig.isXmlFormat()) {
+          if (regConfig.getMapPropertyName() != null) {
+            newContent = insertXmlMapEntry(content, beanContents, regConfig.getMapPropertyName());
+          } else {
+            newContent = insertXmlBeanRegistration(content, regConfig.getInsertPattern(),
+                    beanContents.get(BeanRegistrationConfig.NEW_BEAN_DEFAULT_ID));
+          }
+        } else {
+          newContent = insertBeanRegistration(content, regConfig.getInsertPattern(),
+                  beanContents.get(BeanRegistrationConfig.NEW_BEAN_DEFAULT_ID),
+                  regConfig.isInsertBefore());
+        }
+
+        // 写回文件
+        Files.write(targetFile, newContent.getBytes());
+
+        logger.info("Bean registration added to: " + targetFile);
+      } catch (IOException e) {
+        logger.error("Error processing bean registration for: " + regConfig.getTargetFile());
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  private String insertXmlBeanRegistration(String content, String pattern, String beanContent) {
+    // 匹配</beans>标签
+    Pattern regex = Pattern.compile(pattern);
+    Matcher matcher = regex.matcher(content);
+
+    if (matcher.find()) {
+      // 在</beans>标签之前插入Bean配置
+      int position = matcher.start();
+      return content.substring(0, position) +
+              beanContent +
+              content.substring(position);
+    }
+
+    return content;
+  }
+
+  private String insertBeanRegistration(String content, String pattern, String beanContent, boolean insertBefore) {
+    Pattern regex = Pattern.compile(pattern);
+    Matcher matcher = regex.matcher(content);
+
+    if (matcher.find()) {
+      int position = insertBefore ? matcher.start() : matcher.end();
+      return content.substring(0, position) + "\n" + beanContent + content.substring(position);
+    }
+
+    return content;
+  }
+
+  private Map<String, String> prepareBeanContent(Map<String, String> templates) {
+    Map<String, String> result = new HashMap<>();
+    for(String key : templates.keySet()) {
+      String template = templates.get(key);
+      String content = template;
+      // 替换模板中的模块ID
+      for (Map.Entry<String, String> entry : config.getCaseVariations().entrySet()) {
+        content = content.replace(entry.getKey(), entry.getValue());
+      }
+      result.put(key, content);
+    }
+
+    return result;
+  }
+
+  private String insertXmlMapEntry(String content, Map<String, String> beanTemplates, String propertyName) {
+
+    StringBuilder result = new StringBuilder(content);
+    for(String beanId : beanTemplates.keySet()) {
+      String beanTemplate = beanTemplates.get(beanId);
+      String patternStr = String.format("<bean[^>]*id=\"%s\"[^>]*>[\\s\\S]*?<property\\s+name=\"%s\">\\s*<map>",
+              beanId, propertyName);
+      Pattern pattern = Pattern.compile(patternStr);
+      Matcher matcher = pattern.matcher(result.toString());
+
+      int offset = 0; // 用于跟踪插入位置的变化
+      while (matcher.find()) {
+          // 找到map标签的开始位置
+          int mapStart = matcher.end();
+
+          // 查找map标签的结束位置
+          int mapEnd = findMapEndPosition(result.toString(), mapStart + offset);
+          if (mapEnd > 0) {
+            // 查找最后一个entry的位置
+            int lastEntryEnd = findLastEntryPosition(result.toString(), mapStart + offset, mapEnd + offset);
+            if (lastEntryEnd > 0) {
+              // 在最后一个entry之后插入新的entry
+              result.insert(lastEntryEnd + offset, beanTemplate);
+              offset += beanTemplate.length(); // 更新偏移量
+            } else {
+              // 如果没有entry，直接在map开始后插入
+              result.insert(mapStart + offset, beanTemplate);
+              offset += beanTemplate.length(); // 更新偏移量
+            }
+          }
+        }
+    }
+
+    return result.toString();
+  }
+
+  private String extractBeanId(String content, int startPos) {
+    // 提取bean的id属性
+    Pattern idPattern = Pattern.compile("id=\"([^\"]+)\"");
+    Matcher idMatcher = idPattern.matcher(content);
+    if (idMatcher.find(startPos)) {
+      return idMatcher.group(1);
+    }
+    return null;
+  }
+
+  private int findMapEndPosition(String content, int startPos) {
+    int depth = 1;
+    int pos = startPos;
+
+    while (pos < content.length()) {
+      if (content.substring(pos).startsWith("<map>")) {
+        depth++;
+        pos += 5;
+      } else if (content.substring(pos).startsWith("</map>")) {
+        depth--;
+        if (depth == 0) {
+          return pos;
+        }
+        pos += 6;
+      } else {
+        pos++;
+      }
+    }
+
+    return -1;
+  }
+
+  private int findLastEntryPosition(String content, int mapStart, int mapEnd) {
+    // 查找最后一个entry的结束位置
+    Pattern entryPattern = Pattern.compile("<entry[^>]*>");
+    Matcher entryMatcher = entryPattern.matcher(content);
+    int lastEntryEnd = -1;
+    int currentPos = mapStart;
+
+    while (currentPos < mapEnd) {
+      if (entryMatcher.find(currentPos) && entryMatcher.end() < mapEnd) {
+        lastEntryEnd = entryMatcher.end();
+        currentPos = entryMatcher.end(); // 更新当前位置
+      } else {
+        break; // 如果没有找到更多entry，退出循环
+      }
+    }
+
+    return lastEntryEnd;
   }
 
   private void processFile(Path sourceFile) {
