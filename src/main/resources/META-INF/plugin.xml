@@ -23,8 +23,8 @@
     <!--通过类生成代码，需要依赖Java插件-->
     <depends>com.intellij.modules.java</depends>
     <!--必须依赖Database Tool插件-->
-    <depends>com.intellij.database</depends>
-    <depends>com.sjhy.plugin.easycode</depends>
+<!--    <depends>com.intellij.database</depends>-->
+<!--    <depends>com.sjhy.plugin.easycode</depends>-->
 
 
     <resource-bundle>messages.MyBundle</resource-bundle>
@@ -34,7 +34,10 @@
     <!--    </extensions>-->
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceInterface="com.zxj.h6.codegenerator.service.CodeGenerateService" serviceImplementation="com.zxj.h6.codegenerator.service.impl.CodeGenerateServiceImpl"/>
+        <projectService serviceInterface="com.zxj.h6.codegenerator.service.NewCodeGenerateService" serviceImplementation="com.zxj.h6.codegenerator.service.impl.NewCodeGenerateServiceImpl"/>
+        <applicationService serviceImplementation="com.zxj.h6.codegenerator.service.impl.SettingsStorageServiceImpl"/>
+        <!--系统设置面板-->
+        <applicationConfigurable dynamic="true" instance="com.zxj.h6.codegenerator.ui.MainSettingForm"/>
     </extensions>
 
     <applicationListeners>
@@ -44,10 +47,15 @@
 
     <actions>
         <!-- Add your actions here -->
-        <group id="con.zxj.h6.codegenerator.action" class="com.zxj.h6.codegenerator.actions.MainActionGroup" text="h6-codeGenerator"
+<!--        <group id="con.zxj.h6.codegenerator.action" class="com.zxj.h6.codegenerator.actions.MainActionGroup" text="h6-codeGenerator"-->
+<!--               popup="true">-->
+<!--            &lt;!&ndash;生成代码菜单&ndash;&gt;-->
+<!--            <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>-->
+<!--        </group>-->
+        <action id="con.zxj.h6.codegenerator.module.action" class="com.zxj.h6.codegenerator.actions.ModuleAction" text="Generate H6 Module"
                popup="true">
             <!--生成代码菜单-->
-            <add-to-group group-id="DatabaseViewPopupMenu" anchor="first"/>
-        </group>
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+        </action>
     </actions>
 </idea-plugin>
