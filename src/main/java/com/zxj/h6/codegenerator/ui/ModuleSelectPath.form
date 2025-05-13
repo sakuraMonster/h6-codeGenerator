@@ -44,16 +44,16 @@
           <swingPopup value="false"/>
         </properties>
       </component>
-      <component id="eebcc" class="javax.swing.JLabel">
+      <component id="649f8" class="javax.swing.JLabel">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <labelFor value="158fc"/>
-          <text resource-bundle="string" key="label.package"/>
+          <labelFor value="420b"/>
+          <text resource-bundle="messages/MyBundle" key="label.moduleId"/>
         </properties>
       </component>
-      <component id="fd9f0" class="javax.swing.JTextField" binding="packageField">
+      <component id="420b" class="javax.swing.JTextField" binding="moduleIdField">
         <constraints>
           <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
@@ -63,16 +63,16 @@
           <text value=""/>
         </properties>
       </component>
-      <component id="f96df" class="javax.swing.JLabel">
+	  <component id="649f9" class="javax.swing.JLabel">
         <constraints>
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <labelFor value="ab063"/>
-          <text resource-bundle="string" key="label.path"/>
+          <labelFor value="420b1"/>
+          <text resource-bundle="messages/MyBundle" key="label.moduleNo"/>
         </properties>
       </component>
-      <component id="24bdd" class="javax.swing.JTextField" binding="pathField">
+      <component id="420b1" class="javax.swing.JTextField" binding="moduleNoField">
         <constraints>
           <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
@@ -82,53 +82,18 @@
           <text value=""/>
         </properties>
       </component>
-      <component id="b6336" class="javax.swing.JButton" binding="packageChooseButton">
-        <constraints>
-          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text resource-bundle="string" key="label.choose"/>
-        </properties>
-      </component>
-      <component id="5acb2" class="javax.swing.JButton" binding="pathChooseButton">
-        <constraints>
-          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text resource-bundle="string" key="label.choose"/>
-        </properties>
-      </component>
-      <component id="649f8" class="javax.swing.JLabel">
+	  <component id="649f8" class="javax.swing.JLabel">
         <constraints>
           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <labelFor value="420b"/>
-          <text resource-bundle="messages/MyBundle" key="label.moduleId"/>
+          <labelFor value="420b2"/>
+          <text resource-bundle="messages/MyBundle" key="label.moduleName"/>
         </properties>
       </component>
-      <component id="420b" class="javax.swing.JTextField" binding="moduleIdField">
+      <component id="420b2" class="javax.swing.JTextField" binding="moduleNameField">
         <constraints>
           <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
-        </constraints>
-        <properties>
-          <text value=""/>
-        </properties>
-      </component>
-	  <component id="649f9" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <labelFor value="420b1"/>
-          <text resource-bundle="messages/MyBundle" key="label.moduleNo"/>
-        </properties>
-      </component>
-      <component id="420b1" class="javax.swing.JTextField" binding="moduleNoField">
-        <constraints>
-          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
           </grid>
         </constraints>

@@ -33,5 +33,5 @@ public interface NewCodeGenerateService {
   String generateFromClass(String templateClassName, String targetPackage, String targetClassName,
           String sourcePattern, String targetPattern);
 
-  void generate(TemplateType templateType, ProjectModuleType projectModuleType, String moduleId, Integer moduleNo);
+  void generate(TemplateType templateType, ProjectModuleType projectModuleType, String moduleId, Integer moduleNo, String moduleName);
 }    

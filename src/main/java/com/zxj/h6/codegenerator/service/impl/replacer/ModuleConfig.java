@@ -12,6 +12,7 @@ package com.zxj.h6.codegenerator.service.impl.replacer;
 import com.zxj.h6.codegenerator.entity.SettingsStorageDTO;
 import com.zxj.h6.codegenerator.service.SettingsStorageService;
 import com.zxj.h6.codegenerator.service.impl.template.TemplateConstants;
+import com.zxj.h6.codegenerator.service.impl.template.TemplateType;
 import com.zxj.h6.codegenerator.tool.GlobalDict;
 
 import java.util.ArrayList;
@@ -24,22 +25,22 @@ import java.util.Map;
  */
 public class ModuleConfig {
 
-  private final String sourceModuleId;
+  private final TemplateType templateType;
   private final String targetModuleId;
-  private final Integer sourceModuleNo;
   private final Integer targetModuleNo;
+  private final String targetProjectName;
   private final String targetModuleName;
   private final Map<String, String> caseVariations;
   private final List<BeanRegistrationConfig> beanRegistrations;
 
-  public ModuleConfig(String sourceModuleId, Integer sourceModuleNo, String targetModuleId, Integer targetModuleNo,
-          String targetModuleName) {
-    this.sourceModuleId = sourceModuleId;
-    this.sourceModuleNo = sourceModuleNo;
+  public ModuleConfig(TemplateType templateType, String targetModuleId, Integer targetModuleNo,
+          String targetProjectName, String targetModuleName) {
+    this.templateType = templateType;
     this.targetModuleId = targetModuleId;
     this.targetModuleNo = targetModuleNo;
+    this.targetProjectName = targetProjectName;
     this.targetModuleName = targetModuleName;
-    this.caseVariations = generateCaseVariations(sourceModuleId, targetModuleId);
+    this.caseVariations = generateCaseVariations(templateType.getModuleId(), targetModuleId);
     this.beanRegistrations = new ArrayList<>();
   }
 
@@ -66,10 +67,13 @@ public class ModuleConfig {
     variations.put(original.toUpperCase(), replacement.toUpperCase());
 
     // 替换模块编号
-    variations.put(sourceModuleNo.toString(), targetModuleNo.toString());
+    variations.put(templateType.getModuleNo().toString(), targetModuleNo.toString());
+
+    // 替换模块名称
+    variations.put(templateType.getName(), targetModuleName);
 
     // 替换包名中的模块名
-    variations.put("." + PathConstants.BASE_TEMPLATE_MODULE + ".", "." + targetModuleName + ".");
+    variations.put("." + PathConstants.BASE_TEMPLATE_MODULE + ".", "." + targetProjectName + ".");
 
     TemplateConstants.packageSufixs.forEach((key, value) -> {
       // 包路径替换成小写
@@ -77,10 +81,10 @@ public class ModuleConfig {
     });
 
     // 替换JS文件中的模块名
-    variations.put("'Template.", "'" + targetModuleName.substring(0, 1).toUpperCase() + targetModuleName.substring(1) + ".");
+    variations.put("'Template.", "'" + targetProjectName.substring(0, 1).toUpperCase() + targetProjectName.substring(1) + ".");
 
     // 替换XML文件中的模块名
-    variations.put("-template-", "-" + targetModuleName + "-");
+    variations.put("-template-", "-" + targetProjectName + "-");
 
     // 替换文件的创建人
     SettingsStorageDTO settingsStorageDto = SettingsStorageService.getSettingsStorage();
@@ -93,14 +97,6 @@ public class ModuleConfig {
 
   public Map<String, String> getCaseVariations() {
     return caseVariations;
-  }
-
-  public String getOriginalModuleId() {
-    return sourceModuleId;
-  }
-
-  public String getNewModuleId() {
-    return targetModuleId;
   }
 
   public List<BeanRegistrationConfig> getBeanRegistrations() {

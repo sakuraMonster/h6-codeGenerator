@@ -17,6 +17,7 @@ public enum PackageType {
   dao,
   impl,
   controllers,
+  cp,
   extStore,
   extView
 }

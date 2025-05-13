@@ -52,13 +52,13 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
 
   @Override
   public void generate(TemplateType templateType, ProjectModuleType projectModuleType,
-          String moduleId, Integer moduleNo) {
+          String moduleId, Integer moduleNo, String moduleName) {
 
     logger.info("Starting module replacement...");
     String basePath = project.getBasePath();
 
-    ModuleConfig config = new ModuleConfig(templateType.getModuleId(), templateType.getModuleNo(),
-            moduleId, moduleNo, projectModuleType.getCode());
+    ModuleConfig config = new ModuleConfig(templateType, moduleId, moduleNo, moduleName,
+            projectModuleType.getCode());
 
     try {
       for (PackageType packageType : PackageType.values()) {
@@ -160,6 +160,13 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
                   + "/" + projectModuleType.getCode() + "2"
                   + "/" + PathConstants.BASE_EXT_VIEW + "/" + moduleId.toLowerCase();
           break;
+        case cp:
+          sourceDir = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE + "/" + PathConstants.BASE_CP_PROPERTIES_PATH
+                   + "/" + PathConstants.BASE_TEMPLATE_MODULE + "/dao"
+                   + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
+          targetDir = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE.replace(PathConstants.BASE_TEMPLATE_MODULE,
+                  projectModuleType.getCode())  + "/" + PathConstants.BASE_CP_PROPERTIES_PATH + "/dao"
+                  + "/" + moduleId.toLowerCase();
         default:
           break;
         }

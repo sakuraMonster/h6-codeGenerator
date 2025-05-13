@@ -36,10 +36,6 @@ public class ModuleSelectPath extends DialogWrapper {
   private JComboBox<String> moduleComboBox;
 
   private JComboBox<String> templateComboBox;
-  /**
-   * 包字段
-   */
-  private JTextField packageField;
 
   /**
    *  模块Id
@@ -52,18 +48,10 @@ public class ModuleSelectPath extends DialogWrapper {
   private JTextField moduleNoField;
 
   /**
-   * 路径字段
+   *  模块名
    */
-  private JTextField pathField;
+  private JTextField moduleNameField;
 
-  /**
-   * 包选择按钮
-   */
-  private JButton packageChooseButton;
-  /**
-   * 路径选择按钮
-   */
-  private JButton pathChooseButton;
 
   /**
    * 项目对象
@@ -101,7 +89,7 @@ public class ModuleSelectPath extends DialogWrapper {
     init();
     setTitle("H6 Code Generator Info");
     //初始化路径
-    refreshPath();
+    // refreshPath();
   }
 
   /**
@@ -129,81 +117,6 @@ public class ModuleSelectPath extends DialogWrapper {
   }
 
   private void initEvent() {
-    //监听module选择事件
-    moduleComboBox.addActionListener(e -> {
-      // 刷新路径
-      refreshPath();
-    });
-
-    try {
-      Class<?> cls = Class.forName("com.intellij.ide.util.PackageChooserDialog");
-      //添加包选择事件
-      packageChooseButton.addActionListener(e -> {
-        try {
-          Constructor<?> constructor = cls.getConstructor(String.class, Project.class);
-          Object dialog = constructor.newInstance("Package Chooser", project);
-          // 显示窗口
-          Method showMethod = cls.getMethod("show");
-          showMethod.invoke(dialog);
-          // 获取选中的包名
-          Method getSelectedPackageMethod = cls.getMethod("getSelectedPackage");
-          Object psiPackage = getSelectedPackageMethod.invoke(dialog);
-          if (psiPackage != null) {
-            Method getQualifiedNameMethod = psiPackage.getClass().getMethod("getQualifiedName");
-            String packageName = (String) getQualifiedNameMethod.invoke(psiPackage);
-            packageField.setText(packageName);
-            // 刷新路径
-            refreshPath();
-          }
-        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException |
-                 InvocationTargetException e1) {
-          ExceptionUtil.rethrow(e1);
-        }
-      });
-
-      // 添加包编辑框失去焦点事件
-      packageField.addFocusListener(new FocusAdapter() {
-        @Override
-        public void focusLost(FocusEvent e) {
-          // 刷新路径
-          refreshPath();
-        }
-      });
-    } catch (ClassNotFoundException e) {
-      // 没有PackageChooserDialog，并非支持Java的IDE，禁用相关UI组件
-      packageField.setEnabled(false);
-      packageChooseButton.setEnabled(false);
-    }
-
-    //选择路径
-    pathChooseButton.addActionListener(e -> {
-      //将当前选中的model设置为基础路径
-      VirtualFile path = ProjectUtils.getBaseDir(project);
-      Module module = getSelectModule();
-      if (module != null) {
-        path = ModuleUtils.getSourcePath(module);
-      }
-      VirtualFile virtualFile = FileChooser.chooseFile(FileChooserDescriptorFactory.createSingleFolderDescriptor(), project, path);
-      if (virtualFile != null) {
-        pathField.setText(virtualFile.getPath());
-      }
-    });
-  }
-
-  /**
-   * 刷新目录
-   */
-  private void refreshPath() {
-    String packageName = packageField.getText();
-    // 获取基本路径
-    String path = getBasePath();
-    // 兼容Linux路径
-    path = path.replace("\\", "/");
-    // 如果存在包路径，添加包路径
-    if (!StringUtils.isEmpty(packageName)) {
-      path += "/" + packageName.replace(".", "/");
-    }
-    pathField.setText(path);
   }
 
   /**
@@ -260,6 +173,12 @@ public class ModuleSelectPath extends DialogWrapper {
       return;
     }
 
+    String moduleName = moduleNameField.getText();
+    if(StringUtils.isEmpty(moduleName)) {
+      Messages.showErrorDialog("Can't Write Your Module's ModuleName", GlobalDict.TITLE_INFO);
+      return;
+    }
+
     String projectModule = (String) moduleComboBox.getSelectedItem();
     ProjectModuleType projectModuleType = ProjectModuleType.decode(projectModule);
 
@@ -267,7 +186,7 @@ public class ModuleSelectPath extends DialogWrapper {
     TemplateType templateType = TemplateType.decode(template);
 
     codeGenerateService.generate(templateType, projectModuleType, moduleId,
-            com.zxj.h6.codegenerator.tool.StringUtils.toInteger(moduleNo));
+            com.zxj.h6.codegenerator.tool.StringUtils.toInteger(moduleNo), moduleName);
 
   }
 
