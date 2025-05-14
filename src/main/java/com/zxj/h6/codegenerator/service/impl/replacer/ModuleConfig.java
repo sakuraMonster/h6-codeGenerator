@@ -28,18 +28,18 @@ public class ModuleConfig {
   private final TemplateType templateType;
   private final String targetModuleId;
   private final Integer targetModuleNo;
-  private final String targetProjectName;
   private final String targetModuleName;
+  private final String targetProjectName;
   private final Map<String, String> caseVariations;
   private final List<BeanRegistrationConfig> beanRegistrations;
 
   public ModuleConfig(TemplateType templateType, String targetModuleId, Integer targetModuleNo,
-          String targetProjectName, String targetModuleName) {
+          String targetModuleName, String targetProjectName) {
     this.templateType = templateType;
     this.targetModuleId = targetModuleId;
     this.targetModuleNo = targetModuleNo;
-    this.targetProjectName = targetProjectName;
     this.targetModuleName = targetModuleName;
+    this.targetProjectName = targetProjectName;
     this.caseVariations = generateCaseVariations(templateType.getModuleId(), targetModuleId);
     this.beanRegistrations = new ArrayList<>();
   }
@@ -75,10 +75,8 @@ public class ModuleConfig {
     // 替换包名中的模块名
     variations.put("." + PathConstants.BASE_TEMPLATE_MODULE + ".", "." + targetProjectName + ".");
 
-    TemplateConstants.packageSufixs.forEach((key, value) -> {
-      // 包路径替换成小写
-      variations.put(value.replace("/", "."), targetModuleId.toLowerCase());
-    });
+    // 包路径替换成小写
+    variations.put(templateType.getPackageSufix().replace("/", "."), targetModuleId.toLowerCase());
 
     // 替换JS文件中的模块名
     variations.put("'Template.", "'" + targetProjectName.substring(0, 1).toUpperCase() + targetProjectName.substring(1) + ".");

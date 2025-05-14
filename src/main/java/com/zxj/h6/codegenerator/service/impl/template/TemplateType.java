@@ -15,16 +15,24 @@ package com.zxj.h6.codegenerator.service.impl.template;
  */
 public enum TemplateType {
 
-  BillTemplateA("billTemplateA", 999001, "单据模板A");
+
+
+  BillTemplateA("billTemplateA", 999001, "单据模板A", TemplateConstants.BASE_PACKAGE_SUFIX + "t1"),
+
+  BillTemplateB("billTemplateB", 999002, "单据模板B", TemplateConstants.BASE_PACKAGE_SUFIX + "t2");
 
   private String moduleId;
   private Integer moduleNo;
   private String name;
+  private String packageSufix;
 
-  TemplateType(String moduleId, Integer moduleNo, String name) {
+  public static final String BASE_PACKAGE_SUFIX = "bill/";
+
+  TemplateType(String moduleId, Integer moduleNo, String name, String packageSufix) {
     this.moduleId = moduleId;
     this.moduleNo = moduleNo;
     this.name = name;
+    this.packageSufix = packageSufix;
   }
 
   public String getModuleId() {
@@ -37,6 +45,10 @@ public enum TemplateType {
 
   public String getName() {
     return name;
+  }
+
+  public String getPackageSufix() {
+    return packageSufix;
   }
 
   public static TemplateType valueOfByName(String name) {

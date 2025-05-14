@@ -66,7 +66,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
         config.getBeanRegistrations().clear();
         String sourceDir = basePath + "/" + TEMP_HOLDER_CHAR + "/" + PathConstants.BASE_PACKAGE
                 + "/" + PathConstants.BASE_TEMPLATE_MODULE
-                + "/" + packageType.name() + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
+                + "/" + packageType.name() + "/" + templateType.getPackageSufix();
         String targetDir = basePath + "/" + TEMP_HOLDER_CHAR + "/" + PathConstants.BASE_PACKAGE
                 + "/" + projectModuleType.getCode() + "/" + packageType.name() + "/" + moduleId.toLowerCase();
         switch (packageType) {
@@ -139,7 +139,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
         case controllers:
           sourceDir = basePath + "/" + PathConstants.BASE_WEB + "/" + PathConstants.BASE_PACKAGE + "/" + packageType.name()
                   + "/" + PathConstants.BASE_TEMPLATE_MODULE
-                  + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
+                  + "/" + templateType.getPackageSufix();
           targetDir = basePath + "/" + PathConstants.BASE_WEB + "/" + PathConstants.BASE_PACKAGE + "/" + packageType.name()
                   + "/" + projectModuleType.getCode()
                   + "/" + moduleId.toLowerCase();
@@ -147,7 +147,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
         case extStore:
           sourceDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
                   + "/" + PathConstants.BASE_TEMPLATE_MODULE
-                  + "/" + PathConstants.BASE_EXT_STORE + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
+                  + "/" + PathConstants.BASE_EXT_STORE + "/" + templateType.getPackageSufix();
           targetDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
                   + "/" + projectModuleType.getCode() + "2"
                   + "/" + PathConstants.BASE_EXT_STORE + "/" + moduleId.toLowerCase();
@@ -155,7 +155,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
         case extView:
           sourceDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
                   + "/" + PathConstants.BASE_TEMPLATE_MODULE
-                  + "/" + PathConstants.BASE_EXT_VIEW + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
+                  + "/" + PathConstants.BASE_EXT_VIEW + "/" + templateType.getPackageSufix();
           targetDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
                   + "/" + projectModuleType.getCode() + "2"
                   + "/" + PathConstants.BASE_EXT_VIEW + "/" + moduleId.toLowerCase();
@@ -163,9 +163,9 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
         case cp:
           sourceDir = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE + "/" + PathConstants.BASE_CP_PROPERTIES_PATH
                    + "/" + PathConstants.BASE_TEMPLATE_MODULE + "/dao"
-                   + "/" + TemplateConstants.packageSufixs.get(templateType.getModuleId());
-          targetDir = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE.replace(PathConstants.BASE_TEMPLATE_MODULE,
-                  projectModuleType.getCode())  + "/" + PathConstants.BASE_CP_PROPERTIES_PATH + "/dao"
+                   + "/" + templateType.getPackageSufix();
+          targetDir = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE.replace(PathConstants.BASE_TEMPLATE_MODULE, projectModuleType.getCode())+ "/" + PathConstants.BASE_CP_PROPERTIES_PATH
+                  + "/" + projectModuleType.getCode() + "/dao"
                   + "/" + moduleId.toLowerCase();
         default:
           break;
