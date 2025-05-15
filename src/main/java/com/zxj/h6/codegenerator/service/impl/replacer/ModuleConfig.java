@@ -84,6 +84,9 @@ public class ModuleConfig {
     // 替换XML文件中的模块名
     variations.put("-template-", "-" + targetProjectName + "-");
 
+    // 替换controller层中的url路径
+    variations.put("/template/", "/" + targetProjectName + "/");
+
     // 替换文件的创建人
     SettingsStorageDTO settingsStorageDto = SettingsStorageService.getSettingsStorage();
     if (settingsStorageDto != null) {

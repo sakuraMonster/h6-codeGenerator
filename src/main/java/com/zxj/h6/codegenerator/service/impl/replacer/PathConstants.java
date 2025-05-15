@@ -34,6 +34,8 @@ public class PathConstants {
 
   public static final String BASE_EXT_VIEW = "app/view";
 
+  public static final String BASE_EXT_CONSTANTS = "overrides/common/util";
+
   public static final String BASE_CP_PROPERTIES_PATH = "src/main/resources/com/hd123/hdpos4/";
 
 

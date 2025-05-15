@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -92,17 +93,21 @@ public class FileProcessor {
         // 在指定位置插入Bean注册
         // 在指定位置插入Bean注册
         String newContent;
-        if (regConfig.isXmlFormat()) {
+        if (BeanFormatType.PROPERTY == regConfig.getFormatType()) {
           if (regConfig.getMapPropertyName() != null) {
             newContent = insertXmlMapEntry(content, beanContents, regConfig.getMapPropertyName());
           } else {
             newContent = insertXmlBeanRegistration(content, regConfig.getInsertPattern(),
                     beanContents.get(BeanRegistrationConfig.NEW_BEAN_DEFAULT_ID));
           }
-        } else {
+        } else if (BeanFormatType.SERVER_IMPL == regConfig.getFormatType()) {
           newContent = insertBeanRegistration(content, regConfig.getInsertPattern(),
                   beanContents.get(BeanRegistrationConfig.NEW_BEAN_DEFAULT_ID),
                   regConfig.isInsertBefore());
+        } else if (BeanFormatType.CONSTANT_JS == regConfig.getFormatType()){
+          newContent = insertJsModule(content, beanContents.get(BeanRegistrationConfig.NEW_BEAN_DEFAULT_ID));
+        } else {
+          throw new IllegalArgumentException("Unsupported bean format type: " + regConfig.getFormatType());
         }
 
         // 写回文件
@@ -114,6 +119,64 @@ public class FileProcessor {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  private String insertJsModule(String content, String beanContext) {
+    // 按行分割内容
+    String[] lines = content.split("\n");
+    List<String> lineList = new ArrayList<>(Arrays.asList(lines));
+
+    // 查找 MODULE 对象的起始位置
+    int moduleStartIndex = -1;
+    for (int i = 0; i < lineList.size(); i++) {
+      if (lineList.get(i).trim().equals("MODULE: {")) {
+        moduleStartIndex = i;
+        break;
+      }
+    }
+
+    if (moduleStartIndex == -1) {
+      throw new IllegalArgumentException("未找到 MODULE 对象");
+    }
+
+    // 查找最后一个属性的结束位置（即最后一个 `},` 或 `}`）
+    int lastPropertyEndIndex = -1;
+    for (int i = lineList.size() - 1; i >= moduleStartIndex; i--) {
+      String line = lineList.get(i).trim();
+      if (line.equals("}")) {
+        lastPropertyEndIndex = i;
+        break;
+      }
+    }
+
+    if (lastPropertyEndIndex == -1) {
+      throw new IllegalArgumentException("未找到 MODULE 的最后一个属性结束位置");
+    }
+
+    // 继续往上找第一个 `}` 或 `},` 的行
+    int firstBraceBeforeLast = -1;
+    for (int i = lastPropertyEndIndex - 1; i >= moduleStartIndex; i--) {
+      String line = lineList.get(i).trim();
+      if (line.equals("}") || line.equals("},")) {
+        firstBraceBeforeLast = i;
+        break;
+      }
+    }
+
+    // 如果没有找到更早的 `}` 或 `},`，则使用最后一个 `}` 或 `},` 的行
+    int insertPosition = (firstBraceBeforeLast != -1) ? firstBraceBeforeLast : lastPropertyEndIndex;
+
+    // 检查插入位置的行是否是 `}`，如果是则修改为 `},`
+    String lineAtInsertPosition = lineList.get(insertPosition).trim();
+    if (lineAtInsertPosition.equals("}")) {
+      lineList.set(insertPosition, lineList.get(insertPosition).replace("}", "},"));
+    }
+
+    // 插入新模块（在最后一个属性的结束行之后）
+    lineList.add(lastPropertyEndIndex, beanContext);
+
+    // 重新组合为字符串
+    return String.join("\n", lineList);
   }
 
   private String insertXmlBeanRegistration(String content, String pattern, String beanContent) {
@@ -138,7 +201,7 @@ public class FileProcessor {
 
     if (matcher.find()) {
       int position = insertBefore ? matcher.start() : matcher.end();
-      return content.substring(0, position) + "\n" + beanContent + content.substring(position);
+      return content.substring(0, position) + beanContent + content.substring(position);
     }
 
     return content;

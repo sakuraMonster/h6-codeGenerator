@@ -14,6 +14,7 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.zxj.h6.codegenerator.service.NewCodeGenerateService;
+import com.zxj.h6.codegenerator.service.impl.replacer.BeanFormatType;
 import com.zxj.h6.codegenerator.service.impl.replacer.BeanRegistrationConfig;
 import com.zxj.h6.codegenerator.service.impl.replacer.FileProcessor;
 import com.zxj.h6.codegenerator.service.impl.replacer.ModuleConfig;
@@ -97,14 +98,15 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
             case BillTemplateA:
               BeanRegistrationConfig serverXmlConfig = new BeanRegistrationConfig(
                       targetServerXmlFile, "\\s*</beans>",
-                      TemplateConstants.serverXmlContexts.get(templateType.getModuleId()), true, true);
+                      TemplateConstants.serverXmlContexts.get(templateType.getModuleId()), true,
+                      BeanFormatType.SERVER_IMPL);
               config.addBeanRegistration(serverXmlConfig);
 
               Map<String, String> logBeanTemplates = new HashMap<>();
               logBeanTemplates.put(TemplateConstants.LOG_BEANID, TemplateConstants.logXmlContexts.get(templateType.getModuleId()));
               BeanRegistrationConfig logXmlConfig = new BeanRegistrationConfig(
                       targetLogXmlFile, null,
-                      logBeanTemplates, false, true, "tables");
+                      logBeanTemplates, false, BeanFormatType.PROPERTY, "tables");
               config.addBeanRegistration(logXmlConfig);
 
               Map<String, String> sysDqueryBeanTemplates = new HashMap<>();
@@ -112,7 +114,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
                       TemplateConstants.sysDqueryXmlContexts.get(templateType.getModuleId()));
               BeanRegistrationConfig sysDqueryXmlConfig = new BeanRegistrationConfig(
                       targetSysXmlFile, null,
-                      sysDqueryBeanTemplates, false, true, "constClassNames");
+                      sysDqueryBeanTemplates, false, BeanFormatType.PROPERTY, "constClassNames");
               config.addBeanRegistration(sysDqueryXmlConfig);
 
               Map<String, String> msgBeanTemplates = new HashMap<>();
@@ -121,7 +123,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
               msgBeanTemplates.put(TemplateConstants.COMBO_MESSSAGE_BEANID, TemplateConstants.msgXmlComboContexts.get(templateType.getModuleId()));
               BeanRegistrationConfig msgXmlConfig = new BeanRegistrationConfig(
                       targetMsgXmlFile, null,
-                      msgBeanTemplates, false, true, "moduleMap");
+                      msgBeanTemplates, false, BeanFormatType.PROPERTY, "moduleMap");
               config.addBeanRegistration(msgXmlConfig);
               break;
             default:
@@ -149,7 +151,7 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
                   + "/" + PathConstants.BASE_TEMPLATE_MODULE
                   + "/" + PathConstants.BASE_EXT_STORE + "/" + templateType.getPackageSufix();
           targetDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
-                  + "/" + projectModuleType.getCode() + "2"
+                  + "/" + projectModuleType.getCode() + (!"template".equals(projectModuleType.getCode()) ? "2" : "")
                   + "/" + PathConstants.BASE_EXT_STORE + "/" + moduleId.toLowerCase();
           break;
         case extView:
@@ -157,8 +159,18 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
                   + "/" + PathConstants.BASE_TEMPLATE_MODULE
                   + "/" + PathConstants.BASE_EXT_VIEW + "/" + templateType.getPackageSufix();
           targetDir = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
-                  + "/" + projectModuleType.getCode() + "2"
+                  + "/" + projectModuleType.getCode() + (!"template".equals(projectModuleType.getCode()) ? "2" : "")
                   + "/" + PathConstants.BASE_EXT_VIEW + "/" + moduleId.toLowerCase();
+
+          String targetConstantJSFile = basePath + "/" + PathConstants.BASE_EXT_MODULE + "/" + PathConstants.BASE_EXT_PATH
+                  + "/" + projectModuleType.getCode() + (!"template".equals(projectModuleType.getCode()) ? "2" : "")
+                  + "/" + PathConstants.BASE_EXT_CONSTANTS + "/" + "H4Constants.js";
+
+          BeanRegistrationConfig constantJSConfig = new BeanRegistrationConfig(
+                  targetConstantJSFile, null,
+                  TemplateConstants.constantsJSContexts.get(templateType.getModuleId()), true,
+                  BeanFormatType.CONSTANT_JS);
+          config.addBeanRegistration(constantJSConfig);
           break;
         case cp:
           sourceDir = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE + "/" + PathConstants.BASE_CP_PROPERTIES_PATH

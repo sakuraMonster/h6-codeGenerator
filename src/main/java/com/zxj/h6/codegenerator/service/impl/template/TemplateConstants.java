@@ -9,11 +9,6 @@
  */
 package com.zxj.h6.codegenerator.service.impl.template;
 
-import com.zxj.h6.codegenerator.entity.SettingsStorageDTO;
-import com.zxj.h6.codegenerator.service.SettingsStorageService;
-import com.zxj.h6.codegenerator.service.impl.replacer.PathConstants;
-import com.zxj.h6.codegenerator.tool.GlobalDict;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +37,8 @@ public class TemplateConstants {
 
   public static final Map<String, String> msgXmlComboContexts = new HashMap<String, String>();
 
+  public static final Map<String, String> constantsJSContexts = new HashMap<String, String>();
+
 
   public static final String BASE_SYS_XML = "src/main/resources/META-INF/hdpos4-sys-core/";
 
@@ -69,6 +66,9 @@ public class TemplateConstants {
 
   public static final String PLACE_HOLDER_2 = "{2}";
 
+  public static final String PLACE_HOLDER_3 = "{3}";
+
+  public static final String PLACE_HOLDER_4 = "{4}";
 
   static {
     String serverXml = BASE_SERVER_XML + "template-server.xml";
@@ -90,6 +90,12 @@ public class TemplateConstants {
     String msgXmlComboContext = "\n        <entry key=\"{0}\"\n"
             + "               value=\"com.hd123.hdpos4.template.service.{1}.{2}ComboMsgs\" />";
 
+    String constantsJS = "        {0}: {\n" +
+            "            id: {1},\n" +
+            "            name: \"{2}\",\n" +
+            "            servicePath: 'hdpos4/template/{3}'\n" +
+            "            viewType: '{4}search'\n" +
+            "        }";
 
     for (TemplateType templateType : TemplateType.values()) {
       String firstUpperModuleId = templateType.getModuleId().substring(0, 1).toUpperCase() + templateType.getModuleId().substring(1);
@@ -121,6 +127,14 @@ public class TemplateConstants {
               msgXmlComboContext.replace(PLACE_HOLDER_0, templateType.getModuleId())
                       .replace(PLACE_HOLDER_1, packageSufix)
                       .replace(PLACE_HOLDER_2, firstUpperModuleId));
+
+      constantsJSContexts.put(templateType.getModuleId(),
+              constantsJS.replace(PLACE_HOLDER_0, templateType.getModuleId().toUpperCase())
+                      .replace(PLACE_HOLDER_1, templateType.getModuleNo().toString())
+                      .replace(PLACE_HOLDER_2, templateType.getModuleId())
+                      .replace(PLACE_HOLDER_3, templateType.getModuleId().toLowerCase())
+                      .replace(PLACE_HOLDER_4, templateType.getModuleId().toLowerCase()));
+
     }
 
   }

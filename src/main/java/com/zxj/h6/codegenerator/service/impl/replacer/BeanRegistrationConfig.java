@@ -23,35 +23,27 @@ public class BeanRegistrationConfig {
   private final String insertPattern;     // 插入位置的匹配模式
   private final Map<String, String> beanTemplates;      // Bean注册模板
   private final boolean insertBefore;     // 是否在匹配位置之前插入
-  private final boolean isXmlFormat;      // 是否是XML格式
+  private final BeanFormatType formatType;      // 是否是XML格式
   private final String mapPropertyName;   // map属性名称（用于在特定map中插入entry）
 
-  public BeanRegistrationConfig(String targetFile, String insertPattern,  String beanTemplate, boolean insertBefore) {
-    this(targetFile, insertPattern, buildBeanTemplates(beanTemplate), insertBefore, false, null);
+  public BeanRegistrationConfig(String targetFile, String insertPattern,  String beanTemplate, boolean insertBefore, BeanFormatType formatType) {
+    this(targetFile, insertPattern, buildBeanTemplates(beanTemplate), insertBefore, formatType, null);
   }
 
-  public BeanRegistrationConfig(String targetFile, String insertPattern,  String beanTemplate, boolean insertBefore, boolean isXmlFormat) {
-    this(targetFile, insertPattern, buildBeanTemplates(beanTemplate), insertBefore, isXmlFormat, null);
+  public BeanRegistrationConfig(String targetFile, String insertPattern,  String beanTemplate, boolean insertBefore, BeanFormatType formatType, String mapPropertyName) {
+    this(targetFile, insertPattern, buildBeanTemplates(beanTemplate), insertBefore, formatType, mapPropertyName);
   }
 
-  public BeanRegistrationConfig(String targetFile, String insertPattern,  String beanTemplate, boolean insertBefore, boolean isXmlFormat, String mapPropertyName) {
-    this(targetFile, insertPattern, buildBeanTemplates(beanTemplate), insertBefore, isXmlFormat, mapPropertyName);
+  public BeanRegistrationConfig(String targetFile, String insertPattern,  Map<String, String> beanTemplates, boolean insertBefore, BeanFormatType formatType) {
+    this(targetFile, insertPattern, beanTemplates, insertBefore, formatType, null);
   }
 
-  public BeanRegistrationConfig(String targetFile, String insertPattern,  Map<String, String> beanTemplates, boolean insertBefore) {
-    this(targetFile, insertPattern, beanTemplates, insertBefore, false, null);
-  }
-
-  public BeanRegistrationConfig(String targetFile, String insertPattern,  Map<String, String> beanTemplates, boolean insertBefore, boolean isXmlFormat) {
-    this(targetFile, insertPattern, beanTemplates, insertBefore, isXmlFormat, null);
-  }
-
-  public BeanRegistrationConfig(String targetFile, String insertPattern,  Map<String, String> beanTemplates, boolean insertBefore, boolean isXmlFormat, String mapPropertyName) {
+  public BeanRegistrationConfig(String targetFile, String insertPattern,  Map<String, String> beanTemplates, boolean insertBefore, BeanFormatType formatType, String mapPropertyName) {
     this.targetFile = targetFile;
     this.insertPattern = insertPattern;
     this.beanTemplates = beanTemplates;
     this.insertBefore = insertBefore;
-    this.isXmlFormat = isXmlFormat;
+    this.formatType = formatType;
     this.mapPropertyName = mapPropertyName;
   }
 
@@ -78,8 +70,8 @@ public class BeanRegistrationConfig {
     return insertBefore;
   }
 
-  public boolean isXmlFormat() {
-    return isXmlFormat;
+  public BeanFormatType getFormatType() {
+    return formatType;
   }
 
   public String getMapPropertyName() {
