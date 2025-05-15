@@ -56,6 +56,7 @@
                popup="true">
             <!--生成代码菜单-->
             <add-to-group group-id="ToolsMenu" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl P"/>
         </action>
     </actions>
 </idea-plugin>
