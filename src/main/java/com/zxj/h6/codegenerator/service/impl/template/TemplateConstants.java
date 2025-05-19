@@ -93,7 +93,7 @@ public class TemplateConstants {
     String constantsJS = "        {0}: {\n" +
             "            id: {1},\n" +
             "            name: \"{2}\",\n" +
-            "            servicePath: 'hdpos4/template/{3}'\n" +
+            "            servicePath: 'hdpos4/template/{3}',\n" +
             "            viewType: '{4}search'\n" +
             "        }";
 
