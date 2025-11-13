@@ -109,6 +109,8 @@ public class ModuleSelectPath extends DialogWrapper {
 
     // 单据模板A
     templateComboBox.addItem(TemplateType.BillTemplateA.encode());
+    templateComboBox.addItem(TemplateType.BillTemplateB.encode());
+    templateComboBox.addItem(TemplateType.BillTemplateC.encode());
   }
 
   private void refreshData() {

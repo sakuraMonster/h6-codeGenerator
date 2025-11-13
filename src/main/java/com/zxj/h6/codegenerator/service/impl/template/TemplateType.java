@@ -19,7 +19,10 @@ public enum TemplateType {
 
   BillTemplateA("billTemplateA", 999001, "单据模板A", TemplateConstants.BASE_PACKAGE_SUFIX + "t1"),
 
-  BillTemplateB("billTemplateB", 999002, "单据模板B", TemplateConstants.BASE_PACKAGE_SUFIX + "t2");
+  BillTemplateB("billTemplateB", 999002, "单据模板B", TemplateConstants.BASE_PACKAGE_SUFIX + "t2"),
+
+  BillTemplateC("billTemplateC", 999003, "单据模板C", TemplateConstants.BASE_PACKAGE_SUFIX + "t3");
+
 
   private String moduleId;
   private Integer moduleNo;
