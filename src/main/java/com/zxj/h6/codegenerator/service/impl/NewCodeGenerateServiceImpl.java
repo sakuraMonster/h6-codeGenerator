@@ -20,10 +20,10 @@ import com.zxj.h6.codegenerator.service.impl.replacer.FileProcessor;
 import com.zxj.h6.codegenerator.service.impl.replacer.ModuleConfig;
 import com.zxj.h6.codegenerator.service.impl.replacer.PathConstants;
 import com.zxj.h6.codegenerator.service.impl.template.PackageType;
-import com.zxj.h6.codegenerator.service.impl.template.TemplateConstants;
-import com.zxj.h6.codegenerator.tool.ClassBasedGenerator;
 import com.zxj.h6.codegenerator.service.impl.template.ProjectModuleType;
+import com.zxj.h6.codegenerator.service.impl.template.TemplateConstants;
 import com.zxj.h6.codegenerator.service.impl.template.TemplateType;
+import com.zxj.h6.codegenerator.tool.ClassBasedGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,58 +77,8 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
                   PathConstants.BASE_TEMPLATE_API.replace(PathConstants.BASE_TEMPLATE_MODULE,
                           projectModuleType.getCode()));
 
-          // 目标文件
-          String targetServerXmlFile = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE.replace(
-                  PathConstants.BASE_TEMPLATE_MODULE,
-                  projectModuleType.getCode()) + "/" + TemplateConstants.serverXmls.get(
-                                                                                templateType.getModuleId())
-                                                                                   .replace(
-                                                                                           ProjectModuleType.Template.getCode(),
-                                                                                           projectModuleType.getCode());
-          String targetLogXmlFile = basePath + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.logXmls.get(
-                                                                                templateType.getModuleId());
-
-          String targetSysXmlFile = basePath + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.sysXmls.get(
-                  templateType.getModuleId());
-
-          String targetMsgXmlFile = basePath + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.msgXmls.get(
-                  templateType.getModuleId());
-
-          switch (templateType) {
-            case BillTemplateA:
-              BeanRegistrationConfig serverXmlConfig = new BeanRegistrationConfig(
-                      targetServerXmlFile, "\\s*</beans>",
-                      TemplateConstants.serverXmlContexts.get(templateType.getModuleId()), true,
-                      BeanFormatType.SERVER_IMPL);
-              config.addBeanRegistration(serverXmlConfig);
-
-              Map<String, String> logBeanTemplates = new HashMap<>();
-              logBeanTemplates.put(TemplateConstants.LOG_BEANID, TemplateConstants.logXmlContexts.get(templateType.getModuleId()));
-              BeanRegistrationConfig logXmlConfig = new BeanRegistrationConfig(
-                      targetLogXmlFile, null,
-                      logBeanTemplates, false, BeanFormatType.PROPERTY, "tables");
-              config.addBeanRegistration(logXmlConfig);
-
-              Map<String, String> sysDqueryBeanTemplates = new HashMap<>();
-              sysDqueryBeanTemplates.put(TemplateConstants.SYS_DQUERY_BEANID,
-                      TemplateConstants.sysDqueryXmlContexts.get(templateType.getModuleId()));
-              BeanRegistrationConfig sysDqueryXmlConfig = new BeanRegistrationConfig(
-                      targetSysXmlFile, null,
-                      sysDqueryBeanTemplates, false, BeanFormatType.PROPERTY, "constClassNames");
-              config.addBeanRegistration(sysDqueryXmlConfig);
-
-              Map<String, String> msgBeanTemplates = new HashMap<>();
-              msgBeanTemplates.put(TemplateConstants.CLIENT_MESSSAGE_BEANID, TemplateConstants.msgXmlClientContexts.get(templateType.getModuleId()));
-              msgBeanTemplates.put(TemplateConstants.SERVER_MESSSAGE_BEANID, TemplateConstants.msgXmlServerContexts.get(templateType.getModuleId()));
-              msgBeanTemplates.put(TemplateConstants.COMBO_MESSSAGE_BEANID, TemplateConstants.msgXmlComboContexts.get(templateType.getModuleId()));
-              BeanRegistrationConfig msgXmlConfig = new BeanRegistrationConfig(
-                      targetMsgXmlFile, null,
-                      msgBeanTemplates, false, BeanFormatType.PROPERTY, "moduleMap");
-              config.addBeanRegistration(msgXmlConfig);
-              break;
-            default:
-              break;
-            }
+          // 每次只执行一次
+          buildBeanConfigs(templateType, projectModuleType, basePath, config);
 
           break;
         case dao:
@@ -192,6 +142,67 @@ public class NewCodeGenerateServiceImpl implements NewCodeGenerateService {
 
 
     logger.info("Module replacement completed successfully!");
+  }
+
+  private static void buildBeanConfigs(TemplateType templateType, ProjectModuleType projectModuleType,
+          String basePath, ModuleConfig config) {
+    // 目标文件
+    String targetServerXmlFile = basePath + "/" + PathConstants.BASE_TEMPLATE_CORE.replace(
+            PathConstants.BASE_TEMPLATE_MODULE,
+            projectModuleType.getCode()) + "/" + TemplateConstants.serverXmls.get(
+                                                                          templateType.getModuleId())
+                                                                             .replace(
+                                                                                     ProjectModuleType.Template.getCode(),
+                                                                                     projectModuleType.getCode());
+    String targetLogXmlFile = basePath
+            + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.logXmls.get(
+                                                                          templateType.getModuleId());
+
+    String targetSysXmlFile = basePath
+            + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.sysXmls.get(
+            templateType.getModuleId());
+
+    String targetMsgXmlFile = basePath
+            + "/" + PathConstants.BASE_SYS_CORE + "/" + TemplateConstants.msgXmls.get(
+            templateType.getModuleId());
+
+    // 构建ServiceImpl服务注册
+    BeanRegistrationConfig serverXmlConfig = new BeanRegistrationConfig(
+            targetServerXmlFile, "\\s*</beans>",
+            TemplateConstants.serverXmlContexts.get(templateType.getModuleId()), true,
+            BeanFormatType.SERVER_IMPL);
+    config.addBeanRegistration(serverXmlConfig);
+
+    // 构建log.xml服务注册
+    Map<String, String> logBeanTemplates = new HashMap<>();
+    logBeanTemplates.put(TemplateConstants.LOG_BEANID, TemplateConstants.logXmlContexts.get(
+            templateType.getModuleId()));
+    BeanRegistrationConfig logXmlConfig = new BeanRegistrationConfig(
+            targetLogXmlFile, null,
+            logBeanTemplates, false, BeanFormatType.PROPERTY, "tables");
+    config.addBeanRegistration(logXmlConfig);
+
+    // 构建sys-core.xml的高级查询dquery服务注册
+    Map<String, String> sysDqueryBeanTemplates = new HashMap<>();
+    sysDqueryBeanTemplates.put(TemplateConstants.SYS_DQUERY_BEANID,
+            TemplateConstants.sysDqueryXmlContexts.get(templateType.getModuleId()));
+    BeanRegistrationConfig sysDqueryXmlConfig = new BeanRegistrationConfig(
+            targetSysXmlFile, null,
+            sysDqueryBeanTemplates, false, BeanFormatType.PROPERTY, "constClassNames");
+    config.addBeanRegistration(sysDqueryXmlConfig);
+
+    // 构建sys-core.xml的消息服务注册
+    Map<String, String> msgBeanTemplates = new HashMap<>();
+    msgBeanTemplates.put(TemplateConstants.CLIENT_MESSSAGE_BEANID, TemplateConstants.msgXmlClientContexts.get(
+            templateType.getModuleId()));
+    msgBeanTemplates.put(TemplateConstants.SERVER_MESSSAGE_BEANID, TemplateConstants.msgXmlServerContexts.get(
+            templateType.getModuleId()));
+    msgBeanTemplates.put(TemplateConstants.COMBO_MESSSAGE_BEANID, TemplateConstants.msgXmlComboContexts.get(
+            templateType.getModuleId()));
+    BeanRegistrationConfig msgXmlConfig = new BeanRegistrationConfig(
+            targetMsgXmlFile, null,
+            msgBeanTemplates, false, BeanFormatType.PROPERTY, "moduleMap");
+    config.addBeanRegistration(msgXmlConfig);
   }
 
   /**

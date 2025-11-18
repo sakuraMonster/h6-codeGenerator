@@ -91,12 +91,13 @@ public class FileProcessor {
         Map<String, String> beanContents = prepareBeanContent(regConfig.getBeanTemplates());
 
         // 在指定位置插入Bean注册
-        // 在指定位置插入Bean注册
         String newContent;
         if (BeanFormatType.PROPERTY == regConfig.getFormatType()) {
           if (regConfig.getMapPropertyName() != null) {
+            // 插入MapEntry的配置文件
             newContent = insertXmlMapEntry(content, beanContents, regConfig.getMapPropertyName());
           } else {
+            // 插入新服务Bean的配置文件
             newContent = insertXmlBeanRegistration(content, regConfig.getInsertPattern(),
                     beanContents.get(BeanRegistrationConfig.NEW_BEAN_DEFAULT_ID));
           }
@@ -392,7 +393,7 @@ public class FileProcessor {
     int index = 0;
     for(DateTimeFormatter dateFormatter : dateFormatters) {
       String currentDateStr = currentDate.format(dateFormatter);
-      String regex = index == 0 ? "\\d{4}年\\d{2}月\\d{2}日" : "\\d{4}/\\d{1,2}/\\d{1,2}";
+      String regex = index == 0 ? "\\\\d{4}年\\\\d{2}月\\\\d{2}日" : "\\\\d{4}/\\\\d{1,2}/\\\\d{1,2}";
       Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
       content = pattern.matcher(content).replaceAll(currentDateStr);
       index++;
